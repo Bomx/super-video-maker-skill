@@ -1,0 +1,12 @@
+{
+  "name": "super-video-maker-skill",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agent skill package for end-to-end AI video production.",
+  "scripts": {
+    "remotion:studio": "cd remotion-template && npx remotion studio",
+    "remotion:render": "cd remotion-template && npx remotion render src/index.ts CaptionedTalkingHead out/captioned.mp4 --props=public/render-props.json",
+    "hyperframes:preview": "cd hyperframes-template && npx hyperframes preview compositions/demo.html",
+    "hyperframes:render": "cd hyperframes-template && npx hyperframes render compositions/demo.html --output out/demo.mp4"
+  }
+}

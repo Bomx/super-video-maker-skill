@@ -1,0 +1,12 @@
+{
+  "name": "super-video-maker-hyperframes-template",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "preview": "hyperframes preview compositions/demo.html",
+    "render": "hyperframes render compositions/demo.html --output out/demo.mp4"
+  },
+  "dependencies": {
+    "hyperframes": "latest"
+  }
+}

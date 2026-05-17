@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Super Video Maker Demo</title>
+    <style>
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% 35%, #1a2035 0%, #0f1320 42%, #080b12 100%);
+        color: #ffffff;
+        font-family: Inter, system-ui, sans-serif;
+      }
+
+      .stage {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+      }
+
+      .headline {
+        position: absolute;
+        left: 140px;
+        top: 300px;
+        width: 1080px;
+        font-size: 92px;
+        line-height: 0.95;
+        font-weight: 850;
+        letter-spacing: -4px;
+      }
+
+      .accent {
+        color: #ff6b2c;
+      }
+
+      .card {
+        position: absolute;
+        right: 150px;
+        top: 255px;
+        width: 460px;
+        height: 520px;
+        border-radius: 34px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow: 0 30px 120px rgba(0, 0, 0, 0.35);
+        padding: 34px;
+      }
+
+      .row {
+        height: 54px;
+        border-radius: 18px;
+        margin-bottom: 18px;
+        background: rgba(255, 255, 255, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="stage" data-composition-id="demo" data-start="0" data-width="1920" data-height="1080">
+      <h1 class="headline" data-start="0" data-duration="5" data-track-index="1">
+        AI agents can now make <span class="accent">complete videos</span>
+      </h1>
+
+      <div class="card" data-start="1" data-duration="4" data-track-index="2">
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "durationInSeconds": 3,
+  "mainVideoSrc": "source/main.mp4",
+  "words": [
+    { "word": "Replace", "start": 0.0, "end": 0.35 },
+    { "word": "this", "start": 0.35, "end": 0.55 },
+    { "word": "with", "start": 0.55, "end": 0.8 },
+    { "word": "real", "start": 0.8, "end": 1.05 },
+    { "word": "word", "start": 1.05, "end": 1.3 },
+    { "word": "timestamps.", "start": 1.3, "end": 1.85 }
+  ],
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "accentHex": "#FF6B2C",
+  "maxWordsPerLine": 6,
+  "maxCharsPerLine": 42,
+  "bRollClips": []
+}
