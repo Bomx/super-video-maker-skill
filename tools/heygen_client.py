@@ -14,7 +14,7 @@ Endpoints used:
 Usage:
     from heygen_client import generate_avatar_video, poll_until_ready, download_video
 
-    video_id = generate_avatar_video(script="Welcome to Distribb...")
+    video_id = generate_avatar_video(script="Welcome to Acme...")
     result = poll_until_ready(video_id)
     local_path = download_video(result["video_url"], "avatar_clip.mp4")
 """

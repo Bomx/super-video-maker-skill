@@ -19,8 +19,8 @@ remotion-videos/
 └── src/
     ├── index.ts              # Remotion entrypoint
     ├── Root.tsx              # Registers compositions
-    └── DistribbExplainer/
-        ├── DistribbExplainer.tsx   # Single flat composition — ALL actors live here
+    └── ExplainerVideo/
+        ├── ExplainerVideo.tsx   # Single flat composition — ALL actors live here
         ├── config.ts              # Colors, fonts, features, script
         ├── motionUtils.ts         # Animation primitives + actor() / actorSpring()
         └── components/            # Reusable visual components
@@ -41,7 +41,7 @@ remotion-videos/
 ```bash
 cd remotion-videos
 npx remotion studio          # Preview at localhost:3000
-npx remotion render src/index.ts DistribbExplainer out/video.mp4
+npx remotion render src/index.ts ExplainerVideo out/video.mp4
 python3 generate_voiceover.py  # Generate voiceover + timestamps
 ```
 
@@ -79,7 +79,7 @@ In 1600.agency's videos, there are NO hard cuts. Elements flow continuously.
 
 ### How it works
 
-Every visual element is an **actor** — an IIFE `(() => { ... })()` inside the single `DistribbExplainer.tsx` component. Each actor:
+Every visual element is an **actor** — an IIFE `(() => { ... })()` inside the single `ExplainerVideo.tsx` component. Each actor:
 
 1. Calls `actor(frame, enterAt, exitAt)` or `actorSpring(frame, enterAt, exitAt)` from `motionUtils.ts`
 2. Returns `null` if `!a.visible` (zero rendering cost when off-screen)
@@ -360,7 +360,7 @@ Set `showAudio: true` in `Root.tsx` defaultProps once `voiceover.mp3` exists.
 ### Step 1: Copy the template
 
 ```bash
-cp -r src/DistribbExplainer src/NewVideoName
+cp -r src/ExplainerVideo src/NewVideoName
 ```
 
 ### Step 2: Edit `config.ts`
@@ -402,7 +402,7 @@ Key rules for mockups:
 - Use `interpolate` for progress bars and gauge fills
 - Never use static images — build everything with divs and inline styles
 
-### Step 4: Define the timeline in `DistribbExplainer.tsx`
+### Step 4: Define the timeline in `ExplainerVideo.tsx`
 
 Create a `T` (timeline) object with enter/exit frames for every actor:
 
@@ -610,7 +610,7 @@ boxShadow: `0 0 ${20 + Math.sin(frame * 0.1) * 10}px ${COLORS.accentGlowStrong}`
 
 ## 10b. CaptionedTalkingHead — talking-head MP4 + word captions + PiP b-roll
 
-**Exception:** This composition intentionally composites **real `<Video>`** layers (main + optional B-roll), not the actor-only `DistribbExplainer` pattern. Use `<Sequence>`-free layout inside a single component; timing comes from **ASR word timestamps**, not a `T` frame map.
+**Exception:** This composition intentionally composites **real `<Video>`** layers (main + optional B-roll), not the actor-only `ExplainerVideo` pattern. Use `<Sequence>`-free layout inside a single component; timing comes from **ASR word timestamps**, not a `T` frame map.
 
 | Piece | Location |
 |--------|----------|
@@ -635,7 +635,7 @@ npx remotion render src/index.ts CaptionedTalkingHead out/captioned.mp4 --props=
 
 If **`esbuild` / `package.json` timeouts** occur (Google Drive sync), sync **`remotion-videos/`** to **`/tmp/`** (excluding **`node_modules`**), run **`npm ci`**, and render from there.
 
-**Caption design:** Distribb orange accent `#FF6B2C`, pill tokens, spring pop on active word, dim previous line, bottom readability gradient.
+**Caption design:** brand accent accent `#FF6B2C`, pill tokens, spring pop on active word, dim previous line, bottom readability gradient.
 
 **Remotion license:** See skill / [remotion.pro/license](https://remotion.pro/license) for commercial use.
 

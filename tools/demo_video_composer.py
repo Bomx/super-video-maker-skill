@@ -15,7 +15,7 @@ Usage:
     result = compose_demo_video(
         raw_video_path="screen_recordings/recording_20260331.mp4",
         events_path="screen_recordings/recording_20260331_events.json",
-        narration_script="Welcome to Distribb. Let me show you how easy it is...",
+        narration_script="Welcome to Acme. Let me show you how easy it is...",
         output_path="demo_videos/final_demo.mp4",
     )
 
@@ -933,7 +933,7 @@ def _get_active_click(current_time, click_events, window=1.5):
 
 def generate_narration_script(
     events_path: str,
-    product_name: str = "Distribb",
+    product_name: str = "Acme",
     feature_description: str = "",
 ) -> str:
     """
@@ -1007,7 +1007,7 @@ def compose_from_recording(
     events_path: str,
     narration_script: Optional[str] = None,
     auto_generate_script: bool = True,
-    product_name: str = "Distribb",
+    product_name: str = "Acme",
     feature_description: str = "",
     voice_id: str = DEFAULT_VOICE_ID,
     output_path: Optional[str] = None,
@@ -1053,7 +1053,7 @@ if __name__ == "__main__":
     TEST_RAW_VIDEO = "screen_recordings/recording_test.mp4"
     TEST_EVENTS = "screen_recordings/recording_test_events.json"
     TEST_SCRIPT = (
-        "Welcome to Distribb, the all-in-one SEO content engine. "
+        "Welcome to Acme, the all-in-one SEO content engine. "
         "Watch how easy it is to create, optimize, and distribute content "
         "that actually ranks. Let me walk you through the dashboard."
     )

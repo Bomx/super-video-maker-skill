@@ -1,0 +1,90 @@
+{
+  "id": "screencast-demo",
+  "name": "Screencast Demo",
+  "version": "1.0.0",
+  "description": "Polished SaaS product demo from a raw screen recording with click zooms, laptop mockup frame, gradient backdrop, and optional ElevenLabs narration.",
+  "best_for": [
+    "SaaS landing page demos",
+    "feature walkthroughs",
+    "onboarding videos",
+    "sales enablement clips"
+  ],
+  "not_for": [
+    "trending news explainers with source deck",
+    "UGC paid-social ads",
+    "long podcast repurposing"
+  ],
+  "platforms": ["youtube", "linkedin", "website", "product_hunt"],
+  "aspect_ratios": ["16:9"],
+  "duration_seconds": { "min": 30, "max": 300, "target": 90 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Demo scope",
+      "actions": [
+        "Define one workflow to show start-to-finish",
+        "Write narration script aligned to click events"
+      ],
+      "artifacts": ["demo_brief.json", "narration_script.txt"]
+    },
+    {
+      "id": "record",
+      "title": "Screen capture",
+      "actions": [
+        "Record product flow with screen_recorder and events log",
+        "Hide system errors from end-user-facing copy"
+      ],
+      "artifacts": ["assets/raw_recording.mp4", "assets/events.json"]
+    },
+    {
+      "id": "compose",
+      "title": "Demo composition",
+      "actions": [
+        "Run demo_video_composer with zoom-on-click and laptop frame",
+        "Generate ElevenLabs voiceover if narration requested"
+      ],
+      "artifacts": ["final/demo_master.mp4"],
+      "paid_generation": true
+    },
+    {
+      "id": "qc",
+      "title": "QC and delivery",
+      "actions": [
+        "Run ffmpeg_qc",
+        "Verify clicks are visible and narration matches UI state"
+      ],
+      "artifacts": ["final/demo_master.mp4", "thumbnail.png"]
+    }
+  ],
+  "tools": [
+    "tools/video_orchestrator.py",
+    "tools/screen_recorder.py",
+    "tools/demo_video_composer.py",
+    "tools/music_provider.py",
+    "tools/ffmpeg_qc.py"
+  ],
+  "providers": {
+    "capture": "screen_recorder",
+    "compose": "demo_video_composer",
+    "voice": "elevenlabs_optional",
+    "finish": "ffmpeg"
+  },
+  "routing_keywords": [
+    "screencast",
+    "demo",
+    "walkthrough",
+    "saas",
+    "product tour",
+    "screen recording",
+    "click zoom"
+  ],
+  "routing_negative_keywords": ["ugc ad", "news explainer", "avatar hook"],
+  "script_shape": ["intro_value", "workflow_steps", "cta"],
+  "visual_jobs": ["mechanism", "action"],
+  "qc_checks": [
+    "each click has visible zoom or highlight",
+    "no dead air longer than 2s",
+    "friendly error copy only"
+  ],
+  "deliverables": ["final/demo_master.mp4", "thumbnail.png", "job_state.json"]
+}

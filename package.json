@@ -4,6 +4,9 @@
   "private": true,
   "description": "Agent skill package for end-to-end AI video production.",
   "scripts": {
+    "recipes:list": "python3 tools/video_recipes.py list",
+    "recipes:test": "python3 tools/video_recipes.py test",
+    "recipes:validate": "python3 tools/video_recipes.py validate",
     "remotion:studio": "cd remotion-template && npx remotion studio",
     "remotion:render": "cd remotion-template && npx remotion render src/index.ts CaptionedTalkingHead out/captioned.mp4 --props=public/render-props.json",
     "hyperframes:preview": "cd hyperframes-template && npx hyperframes preview compositions/demo.html",

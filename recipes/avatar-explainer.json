@@ -1,0 +1,140 @@
+{
+  "id": "avatar-explainer",
+  "name": "Avatar Explainer",
+  "version": "1.0.0",
+  "description": "Proof-driven news or tutorial master with HeyGen avatar, source receipts, UI micro-stories, beat-locked b-roll, karaoke captions, and a spoken CTA tail.",
+  "best_for": [
+    "trending news explainers",
+    "product update breakdowns",
+    "SEO or platform change tutorials",
+    "founder-style educational shorts on YouTube or LinkedIn"
+  ],
+  "not_for": [
+    "paid-social conversion ads",
+    "faceless hook montages",
+    "silent end cards"
+  ],
+  "platforms": ["youtube", "linkedin", "x", "website"],
+  "aspect_ratios": ["16:9"],
+  "duration_seconds": { "min": 60, "max": 180, "target": 95 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Intake and source deck",
+      "actions": [
+        "Confirm trend or claim with at least two sources",
+        "Build source deck with unique editorial jobs per asset",
+        "Create job folder and job_state.json"
+      ],
+      "artifacts": ["job_state.json", "source_deck.json"]
+    },
+    {
+      "id": "script",
+      "title": "Script and storyboard",
+      "actions": [
+        "Write hook, avatar disclosure, news beat, story, proof, action, CTA tail",
+        "Map beats to Whisper sentence boundaries in storyboard.json"
+      ],
+      "artifacts": ["avatar_script.txt", "storyboard.json"]
+    },
+    {
+      "id": "avatar",
+      "title": "HeyGen avatar render",
+      "actions": [
+        "Render HeyGen with matched avatar and voice IDs",
+        "Extract audio and Whisper-transcribe",
+        "Trim duplicate script pass if detected"
+      ],
+      "artifacts": ["assets/avatar_raw.mp4", "assets/avatar_audio.mp3", "assets/whisper.json"],
+      "paid_generation": true
+    },
+    {
+      "id": "visuals",
+      "title": "Proof visuals and b-roll",
+      "actions": [
+        "Record agent browser proof for source beats",
+        "Generate Ken Burns from real screenshots first",
+        "Run broll_layout_qc on every candidate visual"
+      ],
+      "artifacts": ["assets/broll/", "assets/proof/", "qc/broll_contact_sheet.png"],
+      "paid_generation": true
+    },
+    {
+      "id": "compose",
+      "title": "FFmpeg master compose",
+      "actions": [
+        "Encode beat segments, concat background track",
+        "Overlay borderless PiP, disclosure badge, karaoke ASS",
+        "Loudnorm master audio and mux final MP4"
+      ],
+      "artifacts": ["final/master_16x9.mp4", "final/master.ass"]
+    },
+    {
+      "id": "qc",
+      "title": "QC and export",
+      "actions": [
+        "Run ffmpeg_qc on master",
+        "Sample frames at every beat and vision-check overlays",
+        "Package deliverables"
+      ],
+      "artifacts": ["final/master_16x9.mp4", "thumbnail.png", "job_state.json"]
+    }
+  ],
+  "tools": [
+    "tools/video_orchestrator.py",
+    "tools/heygen_client.py",
+    "tools/agent_browser_recorder.py",
+    "tools/image_provider.py",
+    "tools/fal_seedance_video.py",
+    "tools/broll_layout_qc.py",
+    "tools/video_captioner.py",
+    "tools/ffmpeg_qc.py"
+  ],
+  "providers": {
+    "avatar": "heygen",
+    "broll": "screenshots_then_fal_seedance_then_openai_kenburns",
+    "transcription": "openai_whisper",
+    "compose": "ffmpeg"
+  },
+  "routing_keywords": [
+    "explainer",
+    "news",
+    "tutorial",
+    "trending",
+    "update",
+    "avatar",
+    "source proof",
+    "heygen",
+    "storyboard"
+  ],
+  "routing_negative_keywords": ["ugc ad", "tiktok ad", "install app", "waitlist"],
+  "script_shape": [
+    "hook",
+    "avatar_disclosure",
+    "news_beat",
+    "story_example",
+    "source_proof",
+    "action_steps",
+    "spoken_cta_tail"
+  ],
+  "visual_jobs": ["proof", "mechanism", "consequence", "action", "transition"],
+  "qc_checks": [
+    "captions centered not lower-left",
+    "pip top-right during body beats",
+    "disclosure badge only first ~4.5s",
+    "outro card visible during spoken CTA",
+    "no b-roll loop inside long beats",
+    "loudnorm I=-16"
+  ],
+  "deliverables": [
+    "final/master_16x9.mp4",
+    "final/master.ass",
+    "thumbnail.png",
+    "storyboard.json",
+    "job_state.json"
+  ],
+  "compliance_notes": [
+    "Bake synthetic presenter disclosure in avatar audio",
+    "Permanent disclosure footer on outro card"
+  ]
+}
