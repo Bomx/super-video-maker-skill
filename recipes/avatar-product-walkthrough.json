@@ -1,0 +1,102 @@
+{
+  "id": "avatar-product-walkthrough",
+  "name": "Avatar Product Walkthrough",
+  "version": "1.0.0",
+  "description": "HeyGen presenter layered over a polished product screen recording for founder-style tutorials and feature intros.",
+  "best_for": [
+    "founder tutorial over SaaS UI",
+    "feature launch walkthrough with presenter",
+    "sales demo with human guide",
+    "course lesson intros"
+  ],
+  "not_for": [
+    "faceless hook ads",
+    "multi-source news explainers",
+    "batch UGC creator testing"
+  ],
+  "platforms": ["youtube", "linkedin", "website"],
+  "aspect_ratios": ["16:9"],
+  "duration_seconds": { "min": 45, "max": 240, "target": 120 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Script and flow",
+      "actions": [
+        "Write short narration tied to UI steps",
+        "Plan where avatar is fullscreen vs chroma-key overlay"
+      ],
+      "artifacts": ["narration_script.txt", "shot_plan.json"]
+    },
+    {
+      "id": "avatar",
+      "title": "HeyGen render",
+      "actions": [
+        "Render green-screen HeyGen clip with matched voice",
+        "Whisper-transcribe for caption timing"
+      ],
+      "artifacts": ["assets/avatar_greenscreen.mp4"],
+      "paid_generation": true
+    },
+    {
+      "id": "demo",
+      "title": "Product capture",
+      "actions": [
+        "Record workflow with screen_recorder",
+        "Compose demo with demo_video_composer or direct FFmpeg chroma key"
+      ],
+      "artifacts": ["assets/demo_raw.mp4", "assets/demo_polished.mp4"]
+    },
+    {
+      "id": "compose",
+      "title": "Overlay and finish",
+      "actions": [
+        "Chroma-key avatar over demo per FFMPEG_PLAYBOOK",
+        "Add captions, music, loudnorm"
+      ],
+      "artifacts": ["final/walkthrough_master.mp4"]
+    },
+    {
+      "id": "qc",
+      "title": "QC",
+      "actions": [
+        "Run ffmpeg_qc",
+        "Verify avatar does not cover critical UI during clicks"
+      ],
+      "artifacts": ["final/walkthrough_master.mp4", "thumbnail.png"]
+    }
+  ],
+  "tools": [
+    "tools/video_orchestrator.py",
+    "tools/heygen_client.py",
+    "tools/screen_recorder.py",
+    "tools/demo_video_composer.py",
+    "tools/video_captioner.py",
+    "tools/ffmpeg_qc.py"
+  ],
+  "providers": {
+    "avatar": "heygen",
+    "demo": "screen_recorder_and_demo_composer",
+    "compose": "ffmpeg",
+    "captions": "ass_or_remotion"
+  },
+  "routing_keywords": [
+    "avatar over demo",
+    "presenter walkthrough",
+    "founder tutorial",
+    "product intro",
+    "heygen over screen"
+  ],
+  "routing_negative_keywords": ["faceless ad", "news source deck", "tiktok ugc"],
+  "script_shape": ["hook", "avatar_disclosure", "feature_steps", "cta"],
+  "qc_checks": [
+    "chroma key has no green spill",
+    "UI text readable under avatar placement",
+    "synthetic disclosure in audio or badge"
+  ],
+  "deliverables": [
+    "final/walkthrough_master.mp4",
+    "thumbnail.png",
+    "job_state.json"
+  ],
+  "compliance_notes": ["Disclose synthetic presenter in narration or badge"]
+}

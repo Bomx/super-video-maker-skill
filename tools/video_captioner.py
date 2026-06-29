@@ -141,9 +141,41 @@ def _seconds_to_ass(ts: float) -> str:
     s, cs    = divmod(rem, 1)
     return f"{int(h):01d}:{int(m):02d}:{int(s):02d}.{int(cs*100):02d}"
 
-def create_ass_subtitle_file(words, width=1080, height=1920, position: str = "middle", font_size: int = 95) -> str:
-    """Build an .ass file with fancy karaoke-style captions — current word in yellow,
-    next two words in white, chunked so no more than 3 words show at a time."""
+def _group_words_into_lines(words, max_words: int = 4, max_chars: int = 30, max_gap: float = 0.7):
+    """Group words into STABLE caption lines so each word appears in exactly one line
+    (no sliding-window repetition between sets). A new line starts when we hit the max
+    word count, the max char count, or a speech gap larger than ``max_gap`` seconds."""
+    lines: list[list] = []
+    cur: list = []
+    chars = 0
+    for w in words:
+        token = (getattr(w, "word", "") or "").strip()
+        if not token:
+            continue
+        add = len(token) + (1 if cur else 0)
+        gap_break = bool(cur) and (float(w.start) - float(cur[-1].end) > max_gap)
+        if cur and (len(cur) >= max_words or chars + add > max_chars or gap_break):
+            lines.append(cur)
+            cur = []
+            chars = 0
+            add = len(token)
+        cur.append(w)
+        chars += add
+    if cur:
+        lines.append(cur)
+    return lines
+
+
+def create_ass_subtitle_file(words, width=1080, height=1920, position: str = "middle",
+                             font_size: int = 95, *, max_words_per_line: int = 4,
+                             max_chars_per_line: int = 30, hold_last: float = 1.0,
+                             highlight_color: str = "&H0000FFFF") -> str:
+    """Build an .ass file with clean karaoke captions.
+
+    Words are grouped into STABLE lines — each word shows in exactly one line, so there
+    is no word repetition from one set to the next. The whole line stays on screen while
+    a single highlight moves across it, tracking the word currently being spoken (not just
+    the first word)."""
     fd, path = tempfile.mkstemp(suffix=".ass")
     os.close(fd)
     logger.info(f"✍️ Creating ASS subtitle file at {path}")
@@ -152,13 +184,13 @@ def create_ass_subtitle_file(words, width=1080, height=1920, position: str = "mi
     position_styles = {
         "top":    {"alignment": 8, "margin_v": 80},
         "middle": {"alignment": 5, "margin_v": 150},
-        "bottom": {"alignment": 2, "margin_v": 80}
+        "bottom": {"alignment": 2, "margin_v": 90},
     }
     style_settings = position_styles.get(position.lower(), position_styles["middle"])
     alignment = style_settings["alignment"]
     margin_v = style_settings["margin_v"]
 
-    # Bold, slightly larger font with thick black outline + shadow for legibility on any background
+    # Bold white text, thick black outline + soft shadow for legibility on any background.
     style_header = (
         "Format: Name, Fontname, Fontsize, PrimaryColour, "
         "SecondaryColour, OutlineColour, BackColour, Bold, Italic, "
@@ -166,44 +198,47 @@ def create_ass_subtitle_file(words, width=1080, height=1920, position: str = "mi
         "BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n"
     )
     style_line = (
-        f"Style: Default,Arial,{font_size},&H00FFFFFF,&H0000FFFF,&H00000000,&HAA000000,"
-        f"-1,0,0,0,100,100,1,0,1,5,2,{alignment},20,20,{margin_v},1"
+        f"Style: Default,Arial,{font_size},&H00FFFFFF,&H0000FFFF,&H00000000,&H64000000,"
+        f"-1,0,0,0,100,100,0,0,1,4,1,{alignment},60,60,{margin_v},1"
     )
 
-    highlight_color = "&H0000FFFF"  # Bright yellow (BGR in ASS)
-    default_color   = "&H00FFFFFF"  # White
+    default_color = "&H00FFFFFF"  # White (BGR in ASS)
 
     dialogues: list[str] = []
-    num_words = len(words)
+    lines = _group_words_into_lines(words, max_words_per_line, max_chars_per_line)
 
-    for i, word_info in enumerate(words):
-        start_time_val = max(0, word_info.start)
-        end_time_val   = max(start_time_val + 0.1, word_info.end)
+    for li, line in enumerate(lines):
+        next_line_start = float(lines[li + 1][0].start) if li + 1 < len(lines) else None
+        for wi, w in enumerate(line):
+            seg_start = max(0.0, float(w.start))
 
-        # Enforce minimum display duration of 150ms
-        if end_time_val - start_time_val < 0.15:
-            new_end = start_time_val + 0.15
-            if i + 1 < num_words:
-                new_end = min(new_end, words[i + 1].start)
-            end_time_val = new_end
+            if wi + 1 < len(line):
+                # Highlight stays on this word until the next word in the line begins.
+                seg_end = float(line[wi + 1].start)
+            else:
+                # Last word in the line: hold the line on screen through a short gap.
+                natural_end = max(float(w.end), seg_start + 0.15)
+                if next_line_start is not None:
+                    seg_end = min(next_line_start, natural_end + hold_last)
+                else:
+                    seg_end = natural_end + hold_last
 
-        start_time = _seconds_to_ass(start_time_val)
-        end_time   = _seconds_to_ass(end_time_val)
+            if seg_end <= seg_start:
+                seg_end = seg_start + 0.12
 
-        # Build up to 3-word chunk: [CURRENT] [next] [next+1]
-        parts = [f"{{\\c{highlight_color}}}{word_info.word.upper()}"]
+            # Render the full (stable) line every event; only the active word is colored.
+            parts = []
+            for k, lw in enumerate(line):
+                token = (getattr(lw, "word", "") or "").strip().upper()
+                if not token:
+                    continue
+                color = highlight_color if k == wi else default_color
+                parts.append(f"{{\\c{color}}}{token}")
+            text = " ".join(parts)
 
-        for lookahead in range(1, 3):  # Show up to 2 words ahead
-            j = i + lookahead
-            if j >= num_words:
-                break
-            gap = words[j].start - end_time_val
-            if gap > 1.0:  # Big pause — don't preview across it
-                break
-            parts.append(f"{{\\c{default_color}}}{words[j].word.upper()}")
-
-        text = " ".join(parts)
-        dialogues.append(f"Dialogue: 0,{start_time},{end_time},Default,,0,0,0,,{text}")
+            dialogues.append(
+                f"Dialogue: 0,{_seconds_to_ass(seg_start)},{_seconds_to_ass(seg_end)},Default,,0,0,0,,{text}"
+            )
 
     dialogues_str = "\n".join(dialogues)
 

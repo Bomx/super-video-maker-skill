@@ -32,3 +32,9 @@ cookies/
 sessions/
 storage_state.json
 *.har
+
+# local-only notes (avatar ids etc.)
+LOCAL.md
+*.local.*
+_devtest/
+_work/

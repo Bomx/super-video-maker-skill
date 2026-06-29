@@ -1,0 +1,87 @@
+{
+  "id": "agent-browser-proof",
+  "name": "Agent Browser Proof",
+  "version": "1.0.0",
+  "description": "Short evidence clip from agent-operated browser investigation: headline highlight, find-on-page, tab switches, and source receipts without a full avatar master.",
+  "best_for": [
+    "standalone proof inserts",
+    "social receipt clips",
+    "b-roll for larger edits",
+    "journalist-style source verification"
+  ],
+  "not_for": [
+    "complete 90s explainers with CTA tail",
+    "UGC ads",
+    "motion graphics launches"
+  ],
+  "platforms": ["youtube", "linkedin", "x", "website"],
+  "aspect_ratios": ["16:9", "9:16"],
+  "duration_seconds": { "min": 8, "max": 45, "target": 22 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Claim and sources",
+      "actions": [
+        "Write the exact claim to verify",
+        "List primary and corroborating URLs"
+      ],
+      "artifacts": ["proof_brief.json", "sources.json"]
+    },
+    {
+      "id": "record",
+      "title": "Investigation recording",
+      "actions": [
+        "Run agent_browser_recorder with investigation script",
+        "Include headline highlight, find-on-page, tab switch, callout"
+      ],
+      "artifacts": ["assets/browser_proof_raw.mp4"],
+      "paid_generation": false
+    },
+    {
+      "id": "edit",
+      "title": "Beat trim and captions",
+      "actions": [
+        "Slice to sentence-aligned beats only",
+        "Add source receipt overlays and optional captions",
+        "Reject slow filler scrolling"
+      ],
+      "artifacts": ["final/proof_clip.mp4", "final/proof_captions.ass"]
+    },
+    {
+      "id": "qc",
+      "title": "QC",
+      "actions": [
+        "Vision-check each beat proves one fact",
+        "Run ffmpeg_qc"
+      ],
+      "artifacts": ["final/proof_clip.mp4"]
+    }
+  ],
+  "tools": [
+    "tools/video_orchestrator.py",
+    "tools/agent_browser_recorder.py",
+    "tools/video_captioner.py",
+    "tools/ffmpeg_qc.py"
+  ],
+  "providers": {
+    "capture": "agent_browser_recorder",
+    "compose": "ffmpeg",
+    "captions": "ass_optional"
+  },
+  "routing_keywords": [
+    "browser proof",
+    "source receipt",
+    "investigation clip",
+    "verify claim",
+    "agent browser",
+    "screenshot evidence"
+  ],
+  "routing_negative_keywords": ["full explainer", "heygen master", "ugc ad"],
+  "visual_jobs": ["proof", "mechanism"],
+  "qc_checks": [
+    "every beat reveals a new fact",
+    "no captcha or cookie modal footage",
+    "source label visible on receipt beats"
+  ],
+  "deliverables": ["final/proof_clip.mp4", "sources.json", "job_state.json"]
+}

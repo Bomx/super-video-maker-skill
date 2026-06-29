@@ -1,0 +1,133 @@
+{
+  "id": "avatar-insta-split",
+  "name": "Avatar Insta Split-Screen Reel",
+  "version": "2.0.0",
+  "description": "Instagram/Reels/Shorts split-screen format: b-roll on top (~53%) — a screen recording OR a tall article screenshot panned at a controllable scroll speed — and an AI avatar talking head on the bottom (~47%, auto-cropped from its content band), karaoke caption pills on the seam, a correctly-shaped hook badge, a low typing SFX bed over the first ~2s, and a click SFX on every b-roll cut. Localizes to the project language: English keeps the HeyGen text voice; non-English uses a dynamically-picked ElevenLabs voice (eleven_v3) lip-synced by the avatar, with localized captions, badge, and a platform-correct CTA. Built for promo/listicle shorts where a scrolling article (or screen recording) carries the proof while the avatar narrates.",
+  "best_for": [
+    "9:16 promo or explainer reels narrated by a HeyGen avatar",
+    "DFY listicle/'best X' reels: a published article scrolled under a talking head with a '#1 PICK' badge",
+    "non-English / localized reels (VO + captions + badge + CTA all follow the project language)",
+    "turning a product screen recording into beat-locked b-roll under a talking head",
+    "comment-gated (Instagram) or brand-callout (YouTube) CTA reels",
+    "reusing one avatar render across many topics by swapping the b-roll + beat map"
+  ],
+  "not_for": [
+    "fullscreen talking-head with no screen recording (use captioned-talking-head)",
+    "fictional UGC creator paid ads (use ugc-ai-ad)",
+    "news/tutorial masters with source receipts and PiP (use avatar-explainer)"
+  ],
+  "platforms": ["Instagram Reels", "TikTok", "YouTube Shorts"],
+  "aspect_ratios": ["9:16"],
+  "duration_seconds": { "min": 20, "max": 60, "target": 35 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Intake + script",
+      "actions": [
+        "Collect the avatar id (CLI/HEYGEN_AVATAR_ID), the PROJECT LANGUAGE and target PLATFORM (YouTube vs Instagram), the b-roll source (a tall article screenshot for a scroll reel, or a screen recording), and the script.",
+        "Write the script IN THE PROJECT LANGUAGE (accents preserved; never em-dashes/smart-quotes/ellipsis). Hook -> listicle/mechanism beats -> CTA. Keep it tight; avatars speak slower than humans so a 33s human script lands near 40s. Whisper-verify brand-name pronunciation (name-safety)."
+      ],
+      "artifacts": ["script.txt"]
+    },
+    {
+      "id": "avatar",
+      "title": "Generate avatar clip (language-aware)",
+      "actions": [
+        "Run workflows/avatar-insta-split/gen_avatar.py --script-file script.txt --out avatar.mp4 --language <Lang> [--gender female] --avatar-id <ID> (9:16, normalized to project fps).",
+        "English -> HeyGen text voice (HEYGEN_VOICE_ID), unchanged. Non-English -> a dynamically-picked ElevenLabs voice (eleven_v3, tools/elevenlabs_voice.py) is uploaded to HeyGen and the avatar lip-syncs it via /v2/video/generate. Bundled model voice, NEVER a cloned personal voice.",
+        "HeyGen renders draw from a separate API credit pool; recover a timed-out poll by video_id instead of regenerating."
+      ],
+      "artifacts": ["avatar.mp4"],
+      "paid_generation": true
+    },
+    {
+      "id": "beatmap",
+      "title": "B-roll + beat map",
+      "actions": [
+        "Article-scroll reel (recommended): capture a tall article screenshot (capture_article.py <url> article.png — includes the headline at y=0 and writes section y-offsets), then author beats with per-beat scroll_from/scroll_to (px in the article at canvas width) for an explicit, tunable scroll SPEED. Include a HEADLINE beat (scroll_from:0).",
+        "Screen-recording reel (legacy): transcribe the avatar audio (Groq), split into beats on phrase breaks, assign each a broll_in + content-zoom crop CW:CH:CX:CY (aspect is now preserved — no squash).",
+        "Generate the hook badge in-pipeline (make_badge.py --brand <Brand> --language <Lang>) so it is correctly shaped + localized; set badge_png + badge_w. Write plan.json (copy plan.example.json)."
+      ],
+      "artifacts": ["article.png", "badge.png", "plan.json"]
+    },
+    {
+      "id": "assemble",
+      "title": "Build split-screen + captions + SFX",
+      "actions": [
+        "Run workflows/avatar-insta-split/build_reel.py plan.json out.mp4.",
+        "It auto-crops the avatar content band into the bottom region, scrolls/cuts the b-roll per beat, renders karaoke pills on the seam (captions auto-follow the VO language via Whisper), overlays the correctly-scaled hook badge, mixes the typing bed + a click on each cut, and loudnorm-exports.",
+        "CTA: Instagram -> comment-DM (cta_word/cta_text). YouTube -> brand callout (cta_anchor:'tail', cta_text:'Zoek <Brand>', cta_word:null) — never 'comment'/'link in bio'."
+      ],
+      "artifacts": ["out.mp4"]
+    },
+    {
+      "id": "qc",
+      "title": "QC + export",
+      "actions": [
+        "Sample a frame per beat: confirm no letterbox bars in the avatar region, captions on the seam, badge on the hook, relevant b-roll per beat.",
+        "Check loudness (~-16 LUFS), no clipping, no black frames, and that the typing bed is audible-but-low and clicks land on cuts."
+      ],
+      "artifacts": ["out.mp4"]
+    }
+  ],
+  "tools": [
+    "workflows/avatar-insta-split/gen_avatar.py",
+    "workflows/avatar-insta-split/build_reel.py",
+    "workflows/avatar-insta-split/make_badge.py",
+    "workflows/avatar-insta-split/capture_article.py",
+    "workflows/avatar-insta-split/make_sfx.py",
+    "tools/elevenlabs_voice.py",
+    "tools/heygen_client.py"
+  ],
+  "providers": {
+    "avatar": "HeyGen (text voice for English; audio-driven lip-sync for non-English)",
+    "voice_non_english": "ElevenLabs eleven_v3 (dynamic voice pick from the shared library by language)",
+    "transcription": "Groq Whisper (whisper-large-v3, multilingual)",
+    "captions": "ImageMagick rounded pills",
+    "compositing": "FFmpeg",
+    "sfx": "procedural (FFmpeg synthesis)"
+  },
+  "routing_keywords": [
+    "avatar reel",
+    "split screen reel",
+    "split-screen",
+    "instagram reel avatar",
+    "article scroll reel",
+    "best x listicle reel",
+    "#1 pick reel",
+    "dfy youtube short avatar",
+    "non-english reel",
+    "dutch reel",
+    "localized avatar reel",
+    "screen recording on top talking head on bottom",
+    "heygen reel",
+    "typing sound reel",
+    "comment to get the link reel"
+  ],
+  "routing_negative_keywords": ["fictional creator", "ugc ad", "fullscreen talking head", "news explainer"],
+  "script_shape": [
+    "Hook (one line, why they should care)",
+    "Mechanism beats (each beat = one b-roll surface that proves the claim)",
+    "Comment-gated CTA (held caption pill at the end)"
+  ],
+  "visual_jobs": ["proof", "mechanism", "consequence", "action"],
+  "qc_checks": [
+    "headline (H1) is on screen during the opening beat (article-scroll reels)",
+    "the article pans at a readable speed and is NOT vertically squashed (aspect preserved)",
+    "the hook badge is correctly proportioned (not stretched) and shows only during its window",
+    "VO + captions + badge + CTA are all in the PROJECT LANGUAGE; brand name pronounces correctly",
+    "avatar region has no letterbox bars (content band detected)",
+    "caption pills sit on the seam and are time-aligned to the words",
+    "CTA matches the platform (Instagram comment-DM vs YouTube brand callout)",
+    "typing bed is low under the first ~2s; a click lands on each cut",
+    "loudness ~-16 LUFS, true peak <= -1.5 dBTP, no clipping, no black frames"
+  ],
+  "deliverables": ["9:16 MP4 (H.264 + AAC 48kHz)", "plan.json", "avatar.mp4", "badge.png", "article.png (scroll reels)"],
+  "compliance_notes": [
+    "Only use an avatar of a real person with their permission or a licensed/own likeness.",
+    "Non-English VO uses a bundled ElevenLabs model voice — NEVER a cloned personal voice (likeness/brand risk at scale).",
+    "Language default is English: English reels are unchanged. Only non-English projects take the ElevenLabs path.",
+    "YouTube CTAs must be brand/search callouts (no 'comment'/'link in bio'); the comment-DM mechanic is Instagram-only.",
+    "Disclose AI presenters where the platform requires it (e.g. realistic AI content labels)."
+  ]
+}

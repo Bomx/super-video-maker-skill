@@ -1,0 +1,93 @@
+{
+  "id": "faceless-broll-ad",
+  "name": "Faceless B-Roll Ad",
+  "version": "1.0.0",
+  "description": "Hook-driven faceless paid-social ad built from Seedance or Ken Burns beats, voiceover, kinetic captions, and music without an on-camera presenter.",
+  "best_for": [
+    "fast hook testing without avatar cost",
+    "category education ads",
+    "problem-agitation spots",
+    "supplemental ad variants when UGC creator batch is expensive"
+  ],
+  "not_for": [
+    "trust-heavy founder explainers",
+    "source-proof journalism",
+    "character-consistent creator batches"
+  ],
+  "platforms": ["tiktok", "instagram", "facebook", "youtube_shorts"],
+  "aspect_ratios": ["9:16", "1:1"],
+  "duration_seconds": { "min": 15, "max": 40, "target": 25 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Angle and hooks",
+      "actions": [
+        "Pick one promise and one CTA",
+        "Split script into 4-6 documentary-realism visual beats"
+      ],
+      "artifacts": ["ad_script.txt", "beat_list.json"]
+    },
+    {
+      "id": "assets",
+      "title": "Beat visuals and audio",
+      "actions": [
+        "Prefer real screenshots and stock over generated",
+        "Generate one clip or Ken Burns still per beat with fal_seedance or image_provider",
+        "Generate voiceover and optional music"
+      ],
+      "artifacts": ["assets/beats/", "assets/voiceover.mp3"],
+      "paid_generation": true
+    },
+    {
+      "id": "assemble",
+      "title": "Concat and captions",
+      "actions": [
+        "Concatenate beats on sentence boundaries",
+        "Burn large bottom captions with video_captioner or ASS",
+        "Loudnorm final mix"
+      ],
+      "artifacts": ["final/vertical_9x16.mp4", "final/captions.ass"]
+    },
+    {
+      "id": "qc",
+      "title": "QC",
+      "actions": [
+        "Reject AI-slop prompts and looping beats",
+        "Run ffmpeg_qc"
+      ],
+      "artifacts": ["final/vertical_9x16.mp4"]
+    }
+  ],
+  "tools": [
+    "tools/video_orchestrator.py",
+    "tools/fal_seedance_video.py",
+    "tools/image_provider.py",
+    "tools/local_explainer_broll.py",
+    "tools/music_provider.py",
+    "tools/video_captioner.py",
+    "tools/ffmpeg_qc.py"
+  ],
+  "providers": {
+    "motion": "fal_seedance_or_openai_kenburns",
+    "voice": "elevenlabs",
+    "music": "elevenlabs_or_suno",
+    "compose": "ffmpeg"
+  },
+  "routing_keywords": [
+    "faceless",
+    "b-roll ad",
+    "no avatar",
+    "hook montage",
+    "kinetic captions",
+    "voiceover ad"
+  ],
+  "routing_negative_keywords": ["heygen", "creator reference", "ugc creator"],
+  "script_shape": ["hook", "pain", "mechanism", "proof", "cta"],
+  "visual_jobs": ["mechanism", "consequence", "action"],
+  "qc_checks": [
+    "no dark cosmic AI-slop imagery",
+    "cuts every 2-4s on generated stills",
+    "documentary-realism prompts only"
+  ],
+  "deliverables": ["final/vertical_9x16.mp4", "final/captions.ass", "job_state.json"]
+}
