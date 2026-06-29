@@ -83,7 +83,9 @@ def main():
         png = br.rel(base, bd["png"])
         if not os.path.exists(png):
             continue
-        inputs += ["-i", png]; bx, byp = bd.get("xy", [116, 150]); nxt = f"v{idx}"
+        # -loop 1: a bare image is a single frame that dies at the first concat-segment
+        # boundary; looping keeps it alive across the whole reel (-shortest caps length).
+        inputs += ["-loop", "1", "-i", png]; bx, byp = bd.get("xy", [116, 150]); nxt = f"v{idx}"
         bw = bd.get("w")
         if bw:
             fc.append(f"[{idx}:v]scale={int(bw)}:-1,setsar=1[bd{idx}]")
@@ -116,7 +118,7 @@ def main():
             pills[j]["end"] = min(pills[j]["end"], pills[j + 1]["start"])
         pills = [p for p in pills if p["end"] - p["start"] > 0.05]
         for p in pills:
-            inputs += ["-i", p["png"]]; nxt = f"v{idx}"
+            inputs += ["-loop", "1", "-i", p["png"]]; nxt = f"v{idx}"
             fc.append(f"[{prev}][{idx}:v]overlay={p['x']}:{p['y']}:enable='between(t,{round(p['start'],3)},{round(p['end'],3)})'[{nxt}]")
             prev = nxt; idx += 1
 
@@ -149,6 +151,9 @@ def main():
 
     if not fc:
         fc = ["[0:v]copy[vout]"]; prev = "vout"
+    if os.getenv("VO_DEBUG"):
+        sys.stderr.write("VIDEO CHAIN:\n  " + "\n  ".join(fc) + f"\nMAP: [{prev}]\nINPUTS: " +
+                         " ".join(p for i, p in enumerate(inputs) if inputs[i-1] == "-i") + "\n")
     cmd = ["ffmpeg", "-y", *inputs, "-filter_complex", ";".join(fc + af),
            "-map", f"[{prev}]", "-map", amap, "-c:v", "libx264", "-preset", "medium", "-crf", "18",
            "-pix_fmt", "yuv420p", "-r", str(FPS), "-c:a", "aac", "-ar", "48000", "-b:a", "192k",
