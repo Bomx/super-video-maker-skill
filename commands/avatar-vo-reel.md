@@ -19,14 +19,14 @@ Pipeline:
    badge/CTA pattern. **Confirm the paid HeyGen render before generating.**
 2. **Script.** Hook (one line) -> one mechanism beat per b-roll surface -> comment- or
    share-gated CTA. Avatars speak slower, so a ~33s human script lands near ~40s.
+   **Write it as flowing connected speech with minimal commas/periods** — HeyGen TTS
+   pauses ~0.3s at every comma and period, so choppy punctuation makes a choppy VO that
+   sounds like the audio cuts out over the b-roll.
 3. **Avatar.** `python3 workflows/avatar-insta-split/gen_avatar.py --script-file script.txt --out job/avatar.mp4 --avatar-id <ID>`
-   (its audio is the continuous voiceover). Recover a timed-out poll by `video_id`;
-   `MOVIO_PAYMENT_INSUFFICIENT_CREDIT` = top up HeyGen **API** credits.
-   Then **de-chop the VO** (recommended for TTS avatars, which insert dead silence at
-   sentence breaks that reads as "audio cutting out" over b-roll):
-   `python3 workflows/avatar-vo-broll/tighten_vo.py job/avatar.mp4 job/avatar_tight.mp4`
-   and use `avatar_tight.mp4` from here on.
-4. **Beat map.** Transcribe the (tightened) avatar audio (Groq). Mark the hook (and optional close)
+   (its audio is the continuous voiceover, laid under the whole reel as one track — never
+   cut per clip). Recover a timed-out poll by `video_id`; `MOVIO_PAYMENT_INSUFFICIENT_CREDIT`
+   = top up HeyGen **API** credits.
+4. **Beat map.** Transcribe the avatar audio (Groq). Mark the hook (and optional close)
    beats `type:"avatar"` and each middle beat `type:"broll"` with the matching library
    clip, cutting on phrase breaks. Beats must cover the whole VO. Author `plan.json`
    (copy `plan.example.json`). Make the badges with `make_badge.py` (topic on the hook,

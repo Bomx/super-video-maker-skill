@@ -27,15 +27,13 @@ talking head should disappear during the b-roll, like Borja's most-successful re
 SPLIT=.agents/skills/super-video-maker/workflows/avatar-insta-split
 VO=.agents/skills/super-video-maker/workflows/avatar-vo-broll
 
-# 1) avatar clip (reuses the avatar-insta-split generator; its audio is the VO)
+# 1) avatar clip (reuses the avatar-insta-split generator; its audio is the VO).
+#    FLUID-VOICE RULE: HeyGen text-to-speech inserts a ~0.3s pause at every comma and
+#    period, so short choppy sentences -> a choppy VO (and over fullscreen b-roll there's
+#    no face to explain the pause). Write the script as flowing connected speech with
+#    minimal punctuation. The audio is laid under the whole reel as ONE continuous track,
+#    never cut or stitched per clip.
 python3 $SPLIT/gen_avatar.py --script-file script.txt --out job/avatar.mp4 --avatar-id <HEYGEN_AVATAR_ID>
-
-# 1b) DE-CHOP the VO (recommended for TTS avatars). HeyGen inserts ~0.3-0.5s of dead
-#     silence at every sentence break; over fullscreen b-roll (no face on screen) that
-#     reads as the audio "cutting out". This trims the dead air from video+audio together
-#     (lip-sync preserved; the hook just gets a natural jump-cut). Author beats on the
-#     TIGHTENED transcript, not the original.
-python3 $VO/tighten_vo.py job/avatar.mp4 job/avatar_tight.mp4   # then use avatar_tight.mp4
 
 # 2) (optional) badges — topic on the hook, CTA over the b-roll
 python3 $SPLIT/make_badge.py --brand "Your Topic" --out job/badge_topic.png
