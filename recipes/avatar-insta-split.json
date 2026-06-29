@@ -1,0 +1,112 @@
+{
+  "id": "avatar-insta-split",
+  "name": "Avatar Insta Split-Screen Reel",
+  "version": "1.0.0",
+  "description": "Instagram/Reels/Shorts split-screen format: screen-recording b-roll on top (~53%), an AI avatar talking head on the bottom (~47%, auto-cropped from its content band), karaoke caption pills on the seam, a hook badge, a low typing SFX bed over the first ~2s, and a click SFX on every b-roll cut. Built for promo/explainer shorts where a screen recording carries the proof while the avatar narrates.",
+  "best_for": [
+    "9:16 promo or explainer reels narrated by a HeyGen avatar",
+    "turning a product screen recording into beat-locked b-roll under a talking head",
+    "comment-gated lead-magnet reels (e.g. 'comment X and I'll send the link')",
+    "reusing one avatar render across many topics by swapping the b-roll + beat map"
+  ],
+  "not_for": [
+    "fullscreen talking-head with no screen recording (use captioned-talking-head)",
+    "fictional UGC creator paid ads (use ugc-ai-ad)",
+    "news/tutorial masters with source receipts and PiP (use avatar-explainer)"
+  ],
+  "platforms": ["Instagram Reels", "TikTok", "YouTube Shorts"],
+  "aspect_ratios": ["9:16"],
+  "duration_seconds": { "min": 20, "max": 60, "target": 35 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Intake + script",
+      "actions": [
+        "Collect the avatar id + voice id (CLI flags or HEYGEN_AVATAR_ID/HEYGEN_VOICE_ID in .env), the screen recording to use as b-roll, and the spoken script.",
+        "Shape the script: hook, mechanism beats, then a comment-gated CTA. Keep it tight; avatars speak slower than humans so a 33s human script lands near 40s."
+      ],
+      "artifacts": ["script.txt"]
+    },
+    {
+      "id": "avatar",
+      "title": "Generate avatar clip",
+      "actions": [
+        "Run workflows/avatar-insta-split/gen_avatar.py --script-file script.txt --out avatar.mp4 (9:16, native background, normalized to project fps).",
+        "HeyGen renders draw from a separate API credit pool; recover a timed-out poll by video_id instead of regenerating."
+      ],
+      "artifacts": ["avatar.mp4"],
+      "paid_generation": true
+    },
+    {
+      "id": "beatmap",
+      "title": "Transcribe + beat map",
+      "actions": [
+        "Transcribe the avatar audio with Groq Whisper (word timestamps).",
+        "Split the narration into beats on sentence/phrase breaks; assign each beat a b-roll in-point and a content-zoom crop of the screen recording (CW:CH:CX:CY).",
+        "Write plan.json (copy plan.example.json)."
+      ],
+      "artifacts": ["avatar_transcript.json", "plan.json"]
+    },
+    {
+      "id": "assemble",
+      "title": "Build split-screen + captions + SFX",
+      "actions": [
+        "Run workflows/avatar-insta-split/build_reel.py plan.json out.mp4.",
+        "It auto-crops the avatar content band into the bottom region, cuts the b-roll on each beat, renders karaoke pills on the seam, overlays the hook badge, mixes the typing bed (first ~2s, very low) + a click on each cut, and loudnorm-exports."
+      ],
+      "artifacts": ["out.mp4"]
+    },
+    {
+      "id": "qc",
+      "title": "QC + export",
+      "actions": [
+        "Sample a frame per beat: confirm no letterbox bars in the avatar region, captions on the seam, badge on the hook, relevant b-roll per beat.",
+        "Check loudness (~-16 LUFS), no clipping, no black frames, and that the typing bed is audible-but-low and clicks land on cuts."
+      ],
+      "artifacts": ["out.mp4"]
+    }
+  ],
+  "tools": [
+    "workflows/avatar-insta-split/gen_avatar.py",
+    "workflows/avatar-insta-split/build_reel.py",
+    "workflows/avatar-insta-split/make_sfx.py",
+    "tools/heygen_client.py"
+  ],
+  "providers": {
+    "avatar": "HeyGen",
+    "transcription": "Groq Whisper (whisper-large-v3)",
+    "captions": "ImageMagick rounded pills",
+    "compositing": "FFmpeg",
+    "sfx": "procedural (FFmpeg synthesis)"
+  },
+  "routing_keywords": [
+    "avatar reel",
+    "split screen reel",
+    "split-screen",
+    "instagram reel avatar",
+    "screen recording on top talking head on bottom",
+    "heygen reel",
+    "typing sound reel",
+    "comment to get the link reel"
+  ],
+  "routing_negative_keywords": ["fictional creator", "ugc ad", "fullscreen talking head", "news explainer"],
+  "script_shape": [
+    "Hook (one line, why they should care)",
+    "Mechanism beats (each beat = one b-roll surface that proves the claim)",
+    "Comment-gated CTA (held caption pill at the end)"
+  ],
+  "visual_jobs": ["proof", "mechanism", "consequence", "action"],
+  "qc_checks": [
+    "avatar region has no letterbox bars (content band detected)",
+    "caption pills sit on the seam and are time-aligned to the words",
+    "hook badge only during the hook window",
+    "b-roll changes on every beat boundary and each crop is readable",
+    "typing bed is low under the first ~2s; a click lands on each cut",
+    "loudness ~-16 LUFS, true peak <= -1.5 dBTP, no clipping, no black frames"
+  ],
+  "deliverables": ["9:16 MP4 (H.264 + AAC 48kHz)", "plan.json", "avatar.mp4"],
+  "compliance_notes": [
+    "Only use an avatar of a real person with their permission or a licensed/own likeness.",
+    "Disclose AI presenters where the platform requires it (e.g. realistic AI content labels)."
+  ]
+}

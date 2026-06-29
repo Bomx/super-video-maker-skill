@@ -1,0 +1,39 @@
+{
+  "_comment": "Example plan for build_reel.py. Paths are resolved relative to THIS file unless absolute. Fill avatar_clip, broll_source, and the beats. crop is the b-roll source crop CW:CH:CX:CY (aspect ~= broll_top_h/canvas.w) zoomed into the content; broll_in is the in-point (seconds) of the b-roll source for that beat.",
+  "canvas": { "w": 1080, "h": 1920, "fps": 30 },
+  "split": {
+    "broll_top_h": 1024,
+    "avatar_bottom_h": 896,
+    "avatar_content_band": "auto"
+  },
+  "avatar_clip": "avatar.mp4",
+  "broll_source": "screen_recording.mp4",
+  "badge_png": "badge.png",
+  "badge_enable": [0, 4.5],
+  "badge_xy": [116, 197],
+  "transcript": null,
+  "caption": {
+    "enabled": true,
+    "font": "Arial-Bold",
+    "pt": 56,
+    "seam_cy": 1006,
+    "padx": 34, "pady": 18, "radius": 30,
+    "cta_word": "comment",
+    "cta_text": "Comment \"SEO\"",
+    "fixups": { "\\bCloud\\b": "Claude" }
+  },
+  "sfx": {
+    "enabled": true,
+    "typing": "assets/typing.wav",
+    "click": "assets/click.wav",
+    "typing_vol": 0.13,
+    "click_vol": 0.38
+  },
+  "work_dir": "_work",
+  "output": "reel_final.mp4",
+  "beats": [
+    { "t0": 0.0, "t1": 5.2,  "broll_in": 1.5,  "crop": "1560:1479:670:360" },
+    { "t0": 5.2, "t1": 8.0,  "broll_in": 15.0, "crop": "1730:1640:600:230" },
+    { "t0": 8.0, "t1": 11.0, "broll_in": 22.0, "crop": "1500:1422:130:380" }
+  ]
+}
