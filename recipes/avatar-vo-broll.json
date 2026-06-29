@@ -1,0 +1,112 @@
+{
+  "id": "avatar-vo-broll",
+  "name": "Avatar Voiceover-over-B-roll Reel",
+  "version": "1.0.0",
+  "description": "Fullscreen Instagram/Reels format: a talking-head avatar HOOK, then fullscreen screen-capture b-roll clips (one per beat) while the avatar VOICEOVER keeps playing, then an optional fullscreen avatar CLOSE. Letterboxed/landscape avatar renders are blurred-filled to fill 9:16. Lower-third karaoke captions, a top badge that can swap (topic to CTA), and a typing bed + click-on-cut. Mirrors the 'film my laptop screen with my phone, talk over it' reel style.",
+  "best_for": [
+    "9:16 reels where the talking head only appears for the hook (and close) and b-roll carries the middle",
+    "remixing a library of screen-capture clips under one avatar voiceover",
+    "comment-gated or share-gated lead-magnet reels in the creator's own style",
+    "reproducing an existing reel beat-for-beat from its transcript + matching b-roll"
+  ],
+  "not_for": [
+    "split-screen top-b-roll/bottom-avatar reels (use avatar-insta-split)",
+    "fictional UGC creator paid ads (use ugc-ai-ad)",
+    "news/tutorial masters with PiP + source receipts (use avatar-explainer)"
+  ],
+  "platforms": ["Instagram Reels", "TikTok", "YouTube Shorts"],
+  "aspect_ratios": ["9:16"],
+  "duration_seconds": { "min": 20, "max": 60, "target": 37 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Intake + script",
+      "actions": [
+        "Collect the avatar id + voice (HEYGEN_AVATAR_ID / HEYGEN_VOICE_ID or ElevenLabs for non-English), the b-roll clip library, and the script.",
+        "Shape the script: hook, then one mechanism beat per b-roll surface, then a comment- or share-gated CTA. Avatars speak slower; a 33s human script lands near 40s."
+      ],
+      "artifacts": ["script.txt"]
+    },
+    {
+      "id": "avatar",
+      "title": "Generate avatar clip (continuous VO)",
+      "actions": [
+        "Reuse avatar-insta-split/gen_avatar.py to render the 9:16 avatar; its audio is the continuous voiceover for the whole reel.",
+        "The avatar video is only shown for the hook (and close); during b-roll beats only its audio plays."
+      ],
+      "artifacts": ["avatar.mp4"],
+      "paid_generation": true
+    },
+    {
+      "id": "beatmap",
+      "title": "Transcribe + map b-roll to beats",
+      "actions": [
+        "Transcribe the avatar audio (Groq Whisper, word timestamps).",
+        "Split into beats on phrase breaks; mark the hook (and close) as type 'avatar' and each middle beat as type 'broll' with the matching library clip.",
+        "Write plan.json (copy plan.example.json)."
+      ],
+      "artifacts": ["avatar_transcript.json", "plan.json"]
+    },
+    {
+      "id": "assemble",
+      "title": "Build fullscreen reel + captions + SFX",
+      "actions": [
+        "Run workflows/avatar-vo-broll/build_vo_broll.py plan.json out.mp4.",
+        "It blurred-fills the avatar to fullscreen for the hook/close, cuts each b-roll clip fullscreen on its beat, lays lower-third karaoke captions, overlays the badge sequence, and mixes the continuous VO + typing bed + click-on-cut with loudnorm."
+      ],
+      "artifacts": ["out.mp4"]
+    },
+    {
+      "id": "qc",
+      "title": "QC + export",
+      "actions": [
+        "Sample a frame per beat: avatar fills the frame on the hook/close, b-roll fills the frame on each beat, captions in the lower third, badge swaps on cue.",
+        "Check loudness (~-16 LUFS), no clipping, no black frames, VO lip-sync continuous across cuts."
+      ],
+      "artifacts": ["out.mp4"]
+    }
+  ],
+  "tools": [
+    "workflows/avatar-vo-broll/build_vo_broll.py",
+    "workflows/avatar-insta-split/gen_avatar.py",
+    "workflows/avatar-insta-split/make_badge.py",
+    "workflows/avatar-insta-split/make_sfx.py",
+    "tools/heygen_client.py"
+  ],
+  "providers": {
+    "avatar": "HeyGen",
+    "transcription": "Groq Whisper (whisper-large-v3)",
+    "captions": "ImageMagick rounded pills",
+    "compositing": "FFmpeg",
+    "sfx": "procedural (FFmpeg synthesis)"
+  },
+  "routing_keywords": [
+    "voiceover over b-roll",
+    "fullscreen b-roll reel",
+    "talking head hook then b-roll",
+    "film my screen with my phone reel",
+    "avatar voiceover reel",
+    "screen capture reel with voiceover",
+    "vo over screen recording"
+  ],
+  "routing_negative_keywords": ["split screen", "side by side", "ugc ad", "fictional creator"],
+  "script_shape": [
+    "Hook (talking head, one line)",
+    "Mechanism beats (each beat = one fullscreen b-roll surface, VO continues)",
+    "CTA (comment- or share-gated; optional talking-head close)"
+  ],
+  "visual_jobs": ["proof", "mechanism", "consequence", "action"],
+  "qc_checks": [
+    "avatar fills the frame on the hook/close (blurred-fill, no raw letterbox bars)",
+    "each b-roll beat fills the frame and is the right clip for the line",
+    "captions sit in the lower third and track the VO words",
+    "badge sequence swaps on cue (topic to CTA)",
+    "typing bed low under the first ~2s; a click lands on each cut",
+    "loudness ~-16 LUFS, true peak <= -1.5 dBTP, no clipping, no black frames"
+  ],
+  "deliverables": ["9:16 MP4 (H.264 + AAC 48kHz)", "plan.json", "avatar.mp4"],
+  "compliance_notes": [
+    "Only use an avatar of a real person with their permission or a licensed/own likeness.",
+    "Disclose AI presenters where the platform requires it."
+  ]
+}

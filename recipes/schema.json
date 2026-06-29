@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://distribb.io/schemas/super-video-maker-recipe.json",
+  "title": "Super Video Maker Recipe",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "version",
+    "description",
+    "best_for",
+    "platforms",
+    "aspect_ratios",
+    "duration_seconds",
+    "stages",
+    "tools",
+    "providers",
+    "routing_keywords",
+    "deliverables"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "name": { "type": "string", "minLength": 3 },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "description": { "type": "string", "minLength": 20 },
+    "best_for": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "not_for": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "platforms": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "aspect_ratios": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["16:9", "9:16", "1:1", "4:5"] },
+      "minItems": 1
+    },
+    "duration_seconds": {
+      "type": "object",
+      "required": ["min", "max", "target"],
+      "properties": {
+        "min": { "type": "number", "minimum": 5 },
+        "max": { "type": "number", "minimum": 5 },
+        "target": { "type": "number", "minimum": 5 }
+      }
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "actions"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "actions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "artifacts": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "paid_generation": { "type": "boolean" }
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "providers": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "routing_keywords": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 3
+    },
+    "routing_negative_keywords": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "script_shape": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "visual_jobs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["proof", "mechanism", "consequence", "action", "transition"]
+      }
+    },
+    "qc_checks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "deliverables": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "compliance_notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

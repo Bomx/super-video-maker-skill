@@ -1,0 +1,83 @@
+{
+  "id": "captioned-talking-head",
+  "name": "Captioned Talking Head",
+  "version": "1.0.0",
+  "description": "Enhance an existing talking-head MP4 with word-level captions and optional b-roll picture-in-picture using the Remotion template.",
+  "best_for": [
+    "founder clips already recorded",
+    "interview footage with insert b-roll",
+    "low-cost caption upgrades",
+    "LinkedIn thought-leadership posts"
+  ],
+  "not_for": [
+    "net-new HeyGen avatar production",
+    "full news source-deck masters",
+    "UGC fictional creator ads"
+  ],
+  "platforms": ["linkedin", "youtube", "instagram", "x"],
+  "aspect_ratios": ["16:9", "9:16", "1:1"],
+  "duration_seconds": { "min": 30, "max": 600, "target": 120 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Source ingest",
+      "actions": [
+        "Place main video in remotion-template/public/source/",
+        "List b-roll inserts with intended sentence triggers"
+      ],
+      "artifacts": ["public/source/main.mp4", "broll_manifest.json"]
+    },
+    {
+      "id": "transcribe",
+      "title": "Word timestamps",
+      "actions": [
+        "Whisper-transcribe main video",
+        "Build render-props.json with b-roll windows"
+      ],
+      "artifacts": ["public/render-props.json", "assets/whisper.json"]
+    },
+    {
+      "id": "render",
+      "title": "Remotion render",
+      "actions": [
+        "Preview in Remotion Studio",
+        "Render CaptionedTalkingHead composition"
+      ],
+      "artifacts": ["out/captioned.mp4"]
+    },
+    {
+      "id": "qc",
+      "title": "QC and export",
+      "actions": [
+        "Run ffmpeg_qc",
+        "Verify captions sync to spoken words"
+      ],
+      "artifacts": ["final/captioned_master.mp4"]
+    }
+  ],
+  "tools": [
+    "tools/video_orchestrator.py",
+    "tools/video_captioner.py",
+    "tools/ffmpeg_qc.py"
+  ],
+  "providers": {
+    "transcription": "openai_whisper",
+    "compose": "remotion",
+    "finish": "ffmpeg_optional"
+  },
+  "routing_keywords": [
+    "talking head",
+    "existing video",
+    "captions only",
+    "b-roll inserts",
+    "remotion",
+    "already recorded"
+  ],
+  "routing_negative_keywords": ["generate avatar", "news explainer", "ugc ad"],
+  "script_shape": ["use_existing_audio"],
+  "qc_checks": [
+    "captions track word timestamps",
+    "b-roll does not cover speaker face during key claims"
+  ],
+  "deliverables": ["final/captioned_master.mp4", "public/render-props.json"]
+}

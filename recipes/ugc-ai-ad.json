@@ -1,0 +1,134 @@
+{
+  "id": "ugc-ai-ad",
+  "name": "UGC AI Ad",
+  "version": "1.0.0",
+  "description": "Paid-social UGC-style ads with a fictional creator, reference-image consistency, hook variants, ElevenLabs voice lock, and direct-response assembly.",
+  "best_for": [
+    "TikTok and Reels conversion ads",
+    "app install or waitlist campaigns",
+    "hook testing batches",
+    "product demo ads with a believable creator"
+  ],
+  "not_for": [
+    "long news explainers",
+    "avatar disclosure educational masters",
+    "documentary source-deck videos"
+  ],
+  "platforms": ["tiktok", "instagram", "facebook", "youtube_shorts"],
+  "aspect_ratios": ["9:16", "1:1", "4:5"],
+  "duration_seconds": { "min": 15, "max": 45, "target": 28 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Ad brief and compliance",
+      "actions": [
+        "Capture product, ICP, pain, CTA, allowed and banned claims",
+        "Confirm reference image rights for fictional creator derivation"
+      ],
+      "artifacts": ["ad_brief.json", "job_state.json"]
+    },
+    {
+      "id": "hooks",
+      "title": "Hook variant matrix",
+      "actions": [
+        "Write 5-8 hooks across confession, contrarian, demo-first families",
+        "Select 2-3 winners for first paid batch"
+      ],
+      "artifacts": ["variant_matrix.json"]
+    },
+    {
+      "id": "character",
+      "title": "Fictional creator bible",
+      "actions": [
+        "Edit reference into distinct fictional creator with gpt-image-2",
+        "Generate face, medium, and wide reference set",
+        "Save character_card.json with visual_seed and voice_id"
+      ],
+      "artifacts": [
+        "assets/character/character_card.json",
+        "assets/character/creator_hero.png"
+      ],
+      "paid_generation": true
+    },
+    {
+      "id": "clips",
+      "title": "Seedance reference clips",
+      "actions": [
+        "Generate beats with same seed and reference images",
+        "Vary only shot action and camera per beat",
+        "QC face drift and uncanny hands"
+      ],
+      "artifacts": ["assets/clips/"],
+      "paid_generation": true
+    },
+    {
+      "id": "voice",
+      "title": "Voice and assembly",
+      "actions": [
+        "Lock ElevenLabs voice for batch or use native Seedance audio intentionally",
+        "Assemble with jump cuts, large captions, product inserts, CTA close"
+      ],
+      "artifacts": ["final/vertical_9x16.mp4", "final/captions.srt"]
+    },
+    {
+      "id": "export",
+      "title": "Variant export and QC",
+      "actions": [
+        "Export 9:16 first, optional 1:1 and 4:5",
+        "Reject unverifiable claims and identity-level likeness"
+      ],
+      "artifacts": ["final/", "variant_matrix.json", "qc_notes.txt"]
+    }
+  ],
+  "tools": [
+    "tools/video_orchestrator.py",
+    "tools/image_provider.py",
+    "tools/fal_seedance_video.py",
+    "tools/music_provider.py",
+    "tools/video_captioner.py",
+    "tools/ffmpeg_qc.py"
+  ],
+  "providers": {
+    "creator_stills": "openai_gpt_image_2",
+    "motion": "fal_seedance_reference",
+    "voice": "elevenlabs",
+    "compose": "ffmpeg"
+  },
+  "routing_keywords": [
+    "ugc",
+    "ad",
+    "tiktok",
+    "reels",
+    "paid social",
+    "hook test",
+    "install",
+    "waitlist",
+    "creator ad"
+  ],
+  "routing_negative_keywords": ["news explainer", "source deck", "heygen tutorial"],
+  "script_shape": [
+    "pattern_interrupt_hook",
+    "specific_problem",
+    "personal_demo",
+    "product_mechanism",
+    "proof_or_result",
+    "objection_handling",
+    "cta"
+  ],
+  "qc_checks": [
+    "first frame communicates hook",
+    "same visual_seed across clips",
+    "no fake testimonial unless user supplied",
+    "no identity recreation of reference person"
+  ],
+  "deliverables": [
+    "final/vertical_9x16.mp4",
+    "variant_matrix.json",
+    "assets/character/character_card.json",
+    "qc_notes.txt"
+  ],
+  "compliance_notes": [
+    "Fictional creator only with licensed or user-owned reference",
+    "No unverifiable income or health promises"
+  ]
+}

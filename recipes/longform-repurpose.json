@@ -1,0 +1,89 @@
+{
+  "id": "longform-repurpose",
+  "name": "Longform Repurpose",
+  "version": "1.0.0",
+  "description": "Turn a podcast, webinar, tutorial, or YouTube long video into multiple vertical shorts with titles and karaoke captions.",
+  "best_for": [
+    "podcast clip batches",
+    "webinar highlights",
+    "YouTube to Shorts repurposing",
+    "sales call highlight reels"
+  ],
+  "not_for": [
+    "net-new scripted explainers",
+    "UGC ad hook tests",
+    "browser proof investigations"
+  ],
+  "platforms": ["tiktok", "instagram", "youtube_shorts", "linkedin"],
+  "aspect_ratios": ["9:16", "1:1"],
+  "duration_seconds": { "min": 20, "max": 90, "target": 45 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Source and segments",
+      "actions": [
+        "Ingest source long video",
+        "Define 3-8 candidate segments with titles and hooks"
+      ],
+      "artifacts": ["inputs/source.mp4", "segments.json"]
+    },
+    {
+      "id": "transcribe",
+      "title": "Full transcription",
+      "actions": [
+        "Whisper-transcribe source once with word timestamps",
+        "Align segment boundaries to sentence breaks"
+      ],
+      "artifacts": ["assets/source_whisper.json"]
+    },
+    {
+      "id": "render",
+      "title": "Short renders",
+      "actions": [
+        "Crop or reframe to 9:16 per segment",
+        "Add top title and karaoke captions per clip",
+        "Optional b-roll inserts only when they clarify the sentence"
+      ],
+      "artifacts": ["final/shorts/"]
+    },
+    {
+      "id": "qc",
+      "title": "Per-clip QC",
+      "actions": [
+        "Run ffmpeg_qc on each short",
+        "Verify hook lands in first 2 seconds"
+      ],
+      "artifacts": ["final/shorts/", "repurpose_manifest.json"]
+    }
+  ],
+  "tools": [
+    "tools/video_orchestrator.py",
+    "tools/video_captioner.py",
+    "tools/ffmpeg_qc.py"
+  ],
+  "providers": {
+    "transcription": "openai_whisper",
+    "compose": "ffmpeg_or_remotion",
+    "captions": "ass_karaoke"
+  },
+  "routing_keywords": [
+    "repurpose",
+    "podcast clips",
+    "webinar",
+    "shorts from long video",
+    "clip batch",
+    "vertical clips"
+  ],
+  "routing_negative_keywords": ["write new script", "heygen avatar", "seedance ugc"],
+  "script_shape": ["segment_hook", "core_insight", "micro_cta"],
+  "qc_checks": [
+    "each short has readable captions",
+    "no mid-sentence hard cuts",
+    "duration within platform limits"
+  ],
+  "deliverables": [
+    "final/shorts/*.mp4",
+    "repurpose_manifest.json",
+    "assets/source_whisper.json"
+  ]
+}
