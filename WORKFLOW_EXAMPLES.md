@@ -44,10 +44,11 @@ Steps:
 Seedance example:
 
 ```bash
-python3 .agents/skills/super-video-maker/tools/replicate_video.py generate \
+python3 .agents/skills/super-video-maker/tools/fal_seedance_video.py generate \
+  --mode text \
   --prompt "handheld UGC shot of a startup founder opening a laptop, fast-paced, natural light, realistic" \
   --duration 7 \
-  --resolution 1080p \
+  --resolution 720p \
   --aspect-ratio 9:16
 ```
 
@@ -205,14 +206,14 @@ Commands:
 
 ```bash
 python3 .agents/skills/super-video-maker/tools/agent_browser_recorder.py
-python3 .agents/skills/super-video-maker/tools/replicate_video.py generate --prompt "original educational explainer metaphor..." --duration 7 --resolution 1080p --aspect-ratio 16:9
+python3 .agents/skills/super-video-maker/tools/fal_seedance_video.py generate --mode text --prompt "original educational explainer metaphor..." --duration 7 --resolution 720p --aspect-ratio 16:9
 python3 .agents/skills/super-video-maker/tools/local_explainer_broll.py
 ```
 
 Example transparency line after the hook:
 
 ```text
-Quick note: this is <name>'s digital avatar walking you through the update.
+Quick note: this is Borja's digital avatar walking you through the update.
 ```
 
 ## 10. Avatar Explainer (`avatar-explainer`) → 90-second master with editorial source deck + spoken CTA tail (CURRENT BEST PRACTICE)
@@ -244,9 +245,9 @@ Pipeline:
    action close → 6-8s spoken CTA tail ("If this kind of teardown is useful,
    hit follow over at <domain> for more <topic>. See you in the next one.").
    Keep the body around 75-85s and the master around 90-100s with the CTA.
-4. **Render HeyGen** with the matching avatar+voice IDs from the user's
-   `.env` (e.g. `HEYGEN_AVATAR_ID=<your_avatar_id>` paired with
-   `HEYGEN_VOICE_ID=<your_voice_id>`).
+4. **Render HeyGen** with the matching avatar+voice IDs (e.g. avatar
+   `731c0983f6664e86857ea60cdb87ba42` paired with voice
+   `028e8a5d94bd4fceaf2ffe5e51cc27cb`).
 5. **Extract audio + Whisper-transcribe** with word + segment timestamps. Note
    where the action close ends and where the CTA tail starts — the gap is
    where the outro card replaces the b-roll.
@@ -368,3 +369,101 @@ v1 through v4 plus the taste review of the Googlebook job):
 - **Screen recordings must investigate.** Cursor jumps, find-on-page, callouts, tab switches, and exact source receipts are good. Slow scrolling is filler.
 - **Story beats need working surfaces.** "Founder lives in Google Docs" should show a messy Google Docs-style launch plan turning into actions, not a generic founder photo.
 - **B-roll needs its own layout QC/edit pass.** Generated clips and UI cards often have spacing mistakes. Use the guided contact sheet to catch PiP collisions, caption-band collisions, cramped typography, clipped UI, and unclear visual jobs before composing.
+
+## 11. UGC AI Ad (`ugc-ai-ad`) -> fictional creator + Seedance consistency
+
+Use this when the user wants paid-social UGC ads that look like a real creator
+recorded them on a phone, while keeping the character and voice consistent
+across hooks and scenes.
+
+Pipeline:
+
+1. **Build the ad brief.** Capture product, offer, ICP, pain point, landing
+   page, desired conversion event, allowed proof, banned claims, platform,
+   aspect ratio, duration, and testing budget.
+2. **Write the variant matrix first.** Produce 5-8 hooks across confession,
+   contrarian, problem-callout, receipt/proof, demo-first, speedrun,
+   before/after, and curiosity-gap families. Pick 2-3 hooks for the first
+   render batch.
+3. **Create the fictional creator.** Use a user-provided or licensed real
+   person image only as a quality reference. Edit it into a distinct fictional
+   adult creator with `gpt-image-2`, `quality=high`, `input_fidelity=high`.
+   Save approved references in `assets/character/`.
+4. **Save `character_card.json`.** Include creator name, fictional bio,
+   wardrobe, camera energy, `visual_seed`, `voice_id`/`voice_seed`, approved
+   reference image paths, allowed claims, banned claims, and negative prompts.
+5. **Generate Seedance clips.** Use the same `--seed` and the same approved
+   `--reference-image` values for every beat. Vary only the action and camera
+   direction: hook talking-to-camera, product demo, UI proof insert, objection
+   line, CTA close.
+6. **Generate or lock voice separately.** Prefer a fixed ElevenLabs voice ID
+   for ad batches. Use Seedance native audio only when the raw phone-recorded
+   feel is more important than repeatable voice control.
+7. **Assemble the ad.** First frame text must match the hook. Use jump cuts,
+   large captions, product inserts, quick proof overlays, and a direct CTA.
+8. **QC before export.** Reject face drift, voice drift, uncanny hands/teeth,
+   too-polished skin, fake testimonial wording, unverifiable claims, or any
+   output too close to the source person's identity.
+9. **Export variants.** Render `9:16` first, then optional `1:1` or `4:5`.
+   Deliver MP4s, captions, `variant_matrix.json`, `character_card.json`,
+   prompts, seeds, and QC notes.
+
+OpenAI creator-reference command:
+
+```bash
+python3 .agents/skills/super-video-maker/tools/image_provider.py edit \
+  --reference-image tmp/video_jobs/<job_id>/inputs/real_person_reference.jpg \
+  --prompt "Create a distinct fictional UGC creator for paid social ads. Preserve photographic quality, lens realism, natural skin texture, lighting fidelity, and believable phone-camera detail, but do not preserve the person's identity. Change facial structure, hairstyle, wardrobe, styling, and context enough that this is a new fictional adult creator. Natural imperfect skin, no beauty filter, no logos, no text, candid vertical portrait in a real home office." \
+  --size 1024x1536 \
+  --quality high \
+  --input-fidelity high \
+  --model gpt-image-2
+```
+
+Seedance consistent-creator command:
+
+```bash
+python3 .agents/skills/super-video-maker/tools/fal_seedance_video.py generate \
+  --mode reference \
+  --prompt "@Image1 and @Image2 show the same fictional UGC creator. Handheld vertical phone video, same face, same hair, same wardrobe family, natural skin texture, speaking casually to camera in a real home office, slight handheld motion, believable phone exposure, no subtitles in footage, no logos, no face morphing." \
+  --duration 5 \
+  --resolution 720p \
+  --aspect-ratio 9:16 \
+  --seed 18427 \
+  --reference-image tmp/video_jobs/<job_id>/assets/character/creator_hero.png \
+  --reference-image tmp/video_jobs/<job_id>/assets/character/creator_medium_phone.png
+```
+
+## 12. Motion Collage Explainer (`motion-collage-explainer`) -> faceless "In a Nutshell" concept short
+
+Full method and prompt formulas: `MOTION_COLLAGE_STYLE.md`. One concept, 20 to 45s,
+9:16. Bold screen-print cutout collage stills, Seedance living-collage motion, calm
+documentary voiceover. No presenter, no screen recording.
+
+```bash
+# 1) Script the ONE idea in the "In a Nutshell" docu voice, split into 3-6 beats.
+#    Open on a question/scenario -> name the concept -> one analogy -> takeaway -> soft CTA.
+
+# 2) Build each collage poster still (gpt-image-2). 9:16 uses 1024x1536.
+python3 .agents/skills/super-video-maker/tools/image_provider.py generate \
+  --prompt "Flat screen-print collage poster, single saturated cobalt-blue background, subtle newsprint grain. Centerpiece: a black-and-white halftone cutout of a tiny suited man flailing and drowning inside a giant wine glass, treated as a paper sticker with a thin white die-cut outline, torn edges, soft drop shadow. Visible halftone dots, vintage editorial photo feel. Accent cutouts: a cream circle top-left, a solid navy triangle bottom-right, a few white water droplets. Torn-paper label near the bottom reading 'DROWNING IN A GLASS OF WATER' in bold condensed uppercase newspaper type. Matte risograph aesthetic, limited palette. Leave headroom at top and a clear band at bottom for the label. Avoid gradients, glow, neon, 3D render, photorealism, extra text." \
+  --size 1024x1536 --quality high --output-format png
+
+# 3) Animate the approved still into a living collage (image-to-video).
+python3 .agents/skills/super-video-maker/tools/fal_seedance_video.py generate \
+  --mode image \
+  --reference-image output_images/collage_beat1.png \
+  --prompt "Subtle living-collage motion. The paper cutout gently bobs with soft parallax against the flat background. Accent shapes drift and rotate slightly. Water ripples inside the glass and one droplet falls. Faint halftone shimmer, gentle slow push-in. Everything stays a flat printed paper collage, texture preserved. No new objects, no camera whip, no realistic 3D, no scene change, no morphing faces, no added text." \
+  --duration 5 --resolution 1080p --aspect-ratio 9:16
+
+# 4) ElevenLabs docu VO -> Whisper word timing -> beat-lock cuts to sentence breaks.
+# 5) Concat beats, centered karaoke captions clear of the torn-paper label band, loudnorm.
+python3 .agents/skills/super-video-maker/tools/video_captioner.py
+python3 .agents/skills/super-video-maker/tools/ffmpeg_qc.py
+```
+
+QC: every frame still reads as a flat printed collage (Seedance did not realify it),
+consistent background/outline/label across beats, no glow/neon/3D/gradient, subtle
+loop-safe motion, captions synced and clear of the label. For the keyword-led title,
+description, tags, and publish-to-YouTube wrapper, drive this recipe from the Distribb
+skill's `/youtube-motion-video` playbook.

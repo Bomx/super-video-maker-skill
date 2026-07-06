@@ -1,0 +1,162 @@
+{
+  "id": "avatar-hook-broll",
+  "name": "Avatar Hook + Beat-Locked B-Roll Short",
+  "version": "1.0.0",
+  "description": "9:16 short that opens on a Seedance avatar selfie hook (lip-synced via ElevenLabs reference audio, native clip audio KEPT for the hook), then cuts to a fast-paced body (~2s cuts) of beat-locked b-roll — real screen recordings, documentary motion clips, and Ken Burns stills — with single-word serif karaoke captions, a topic badge during the hook, and a 'comment X and I'll send you Y' CTA card. Born from Borja's 'Claude Mythos SEO Test' template (2026-06-10).",
+  "best_for": [
+    "trending-topic shorts for a niche audience (trend + niche angle)",
+    "DFY YouTube Shorts / Instagram Reels for Distribb customers",
+    "comment-gated lead magnet CTAs (comment X, get Y)",
+    "product surfaces or niche b-roll narrated by a consistent UGC character"
+  ],
+  "not_for": [
+    "long-form explainers with source decks",
+    "paid-social conversion ads (use ugc-ai-ad)",
+    "videos where the avatar must speak past the hook"
+  ],
+  "platforms": [
+    "youtube_shorts",
+    "instagram_reels",
+    "tiktok"
+  ],
+  "aspect_ratios": [
+    "9:16"
+  ],
+  "duration_seconds": {
+    "min": 25,
+    "max": 60,
+    "target": 38
+  },
+  "stages": [
+    {
+      "id": "script_vo",
+      "title": "Script + voice-first VO",
+      "actions": [
+        "Write original script: hook (<=8s, 1-2 SHORT sentences), 3-4 body beats, spoken 'comment X and I'll send you Y' CTA",
+        "Pick a gender-matched ElevenLabs voice for the character; generate full VO with word timestamps (elevenlabs_tts_with_timestamps)",
+        "VERIFY VO gender by pitch (median <165 Hz male, >165 Hz female) before any paid video call",
+        "Slice the hook words into hook_vo.wav using word timestamps"
+      ],
+      "artifacts": [
+        "script.json",
+        "vo_master.mp3",
+        "vo_words.json",
+        "hook_vo.wav"
+      ],
+      "paid_generation": true
+    },
+    {
+      "id": "avatar_hook",
+      "title": "Seedance avatar hook clip",
+      "actions": [
+        "Lock a character card + reference image (user-provided or text-only gpt-image-2; NEVER derived from the user's own footage)",
+        "Generate ONE 6s 9:16 reference-to-video clip: --reference-image <character> --reference-audio hook_vo.wav --generate-audio, prompt includes the exact hook line and any pattern interrupt",
+        "KEEP the clip's native audio for the hook (reference audio clones the VOICE but NOT timing; mute-and-overlay drifts >1s)",
+        "QC: Whisper the clip (exact words), pitch-check the cloned voice gender, frame-check character match"
+      ],
+      "artifacts": [
+        "assets/character/character_card.json",
+        "assets/hook_clip.mp4",
+        "assets/hook_clip_whisper.json"
+      ],
+      "paid_generation": true
+    },
+    {
+      "id": "broll",
+      "title": "Beat-locked b-roll harvest/generation",
+      "actions": [
+        "Map each narration line to a visual using vo_words.json timings",
+        "Prefer real surfaces: logged-in product screen recordings (Playwright; record_video_size MUST equal viewport) or the customer's live published pages/images",
+        "If real assets are low-res or missing: generate documentary-realism Seedance text-to-video motion clips (no audio) + gpt-image-2 stills; cut every ~2-3s, never hold one still >3.5s",
+        "NO slow text scrolls — text-heavy blog scrolling kills retention (Borja feedback 2026-06-10)"
+      ],
+      "artifacts": [
+        "assets/screens/*.webm",
+        "assets/motion/*.mp4",
+        "assets/stills/*.png"
+      ],
+      "paid_generation": true
+    },
+    {
+      "id": "assemble",
+      "title": "Timeline assembly",
+      "actions": [
+        "Video: hook clip (6s) -> ~12 fast cuts beat-locked to VO -> CTA card with push-in; CTA duration = audio_dur - body_sum so -shortest never clips the spoken CTA",
+        "Audio: hook native 0-6s, acrossfade (0.12s) into vo_master from just before the first body word, loudnorm I=-16:TP=-1.5:LRA=11",
+        "Overlays: Pillow topic badge top-left during hook (0-2.4s); single-word Times New Roman karaoke captions (ASS Alignment=2, MarginV~240, Outline 5), clamp word end-times to next word start",
+        "FFmpeg gotchas: zoompan on stills = single image input + -frames:v N (never -loop 1 -t); zoompan on video = d=1 + trim"
+      ],
+      "artifacts": [
+        "assets/video_track.mp4",
+        "assets/audio_track.m4a",
+        "assets/captions.ass"
+      ]
+    },
+    {
+      "id": "qc",
+      "title": "QC and delivery",
+      "actions": [
+        "Run ffmpeg_qc (1080x1920 h264/aac yuv420p, no black frames)",
+        "Frame-sheet review: captions legible on light b-roll, no overlay collisions, every cut matches its narration line",
+        "Listen check: hook-native -> VO voice seam at the 6s cut",
+        "Copy the final MP4 to ~/Desktop (the skill tmp dir is hidden from Finder)"
+      ],
+      "artifacts": [
+        "final master mp4 on Desktop"
+      ]
+    }
+  ],
+  "tools": [
+    "tools/fal_seedance_video.py",
+    "tools/image_provider.py",
+    "tools/ffmpeg_qc.py",
+    "tools/broll_layout_qc.py"
+  ],
+  "providers": [
+    "fal.ai bytedance/seedance-2.0/reference-to-video (avatar hook)",
+    "fal.ai bytedance/seedance-2.0/text-to-video (documentary b-roll motion)",
+    "elevenlabs eleven_v3 with-timestamps (VO)",
+    "openai gpt-image-2 (character refs + documentary stills)",
+    "groq whisper-large-v3 (clip QC + word timing)",
+    "playwright + system chrome channel (screen recordings)"
+  ],
+  "routing_keywords": [
+    "avatar hook",
+    "seedance hook",
+    "comment gated short",
+    "trend hook short",
+    "dfy short",
+    "hook plus screencast",
+    "hook plus broll",
+    "lena",
+    "theo"
+  ],
+  "routing_negative_keywords": [
+    "paid ad",
+    "long form",
+    "podcast"
+  ],
+  "script_shape": [
+    "Hook (<=8s, avatar): trend + why care, 1-2 short sentences",
+    "Body beat 1-4 (b-roll): concrete specifics, each beat = one visual",
+    "Spoken CTA: 'Comment <WORD> and I'll send you <asset>'"
+  ],
+  "qc_checks": [
+    "hook clip says the exact scripted words (Whisper)",
+    "cloned hook voice gender matches character (pitch check)",
+    "video duration == audio duration (CTA card absorbs remainder)",
+    "no single still >3.5s on screen",
+    "captions never collide with b-roll text or badge"
+  ],
+  "deliverables": [
+    "1080x1920 master MP4 (loudnorm broadcast-safe)",
+    "character_card.json + reference image (reusable across episodes)",
+    "script.json + vo_words.json (beat map)",
+    "job_state.json with learnings"
+  ],
+  "compliance_notes": [
+    "User videos provided as 'templates' are STRUCTURE-ONLY references: never composite their pixels, never reuse their frames as image-gen references, never clone their script wording (feedback 2026-06-10)",
+    "No spoken digital-avatar disclosure per owner decision; set the platform synthetic-media flag at upload instead",
+    "Phone/UI shots must use real product pixels (no generated readable UI)"
+  ]
+}

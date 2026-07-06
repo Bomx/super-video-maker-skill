@@ -1,0 +1,220 @@
+{
+  "id": "misotts-article-sprint",
+  "name": "Article Sprint (Floating Head + Article Receipts)",
+  "version": "4.0.0",
+  "description": "Ultra-low-cost 9:16 short (~35s): floating-head avatar (greenscreen Seedance cutout) speaks the hook over the article title, then a whip-scroll article runthrough with receipt cards per beat. VO = ELEVENLABS 'Brielle' (6u6JbqKdaQy89ENzLSju, eleven_v3, stability 0.35, ~$0.10/video) reading a SPOKEN_VO_HUMANIZER.md script \u2014 owner-approved take is sliced into hook (Seedance lip-sync reference) + body. MisoTTS demoted to future fine-tune/scale path (base checkpoint flattens prosody; see MISOTTS_RUNPOD_GUIDE.md \u00a7Prosody). v7 validated 2026-06-12.",
+  "best_for": [
+    "DFY YouTube Shorts / Instagram Reels at scale (one per published article)",
+    "article promotion shorts: 'this new ranking/guide says X' + receipts",
+    "listicle articles with concrete numbers (prices, limits, counts)",
+    "any pipeline where ElevenLabs per-video cost is the bottleneck"
+  ],
+  "not_for": [
+    "videos needing the avatar on screen past the hook",
+    "topics with no published article to scroll",
+    "non-English voiceover (MisoTTS is English-only \u2014 use ElevenLabs path)"
+  ],
+  "platforms": [
+    "youtube_shorts",
+    "instagram_reels",
+    "tiktok"
+  ],
+  "aspect_ratios": [
+    "9:16"
+  ],
+  "duration_seconds": {
+    "min": 15,
+    "max": 32,
+    "target": 30
+  },
+  "stages": [
+    {
+      "id": "script_capture",
+      "title": "Script + article capture (free, parallel with pod boot)",
+      "actions": [
+        "Pick the TOPIC ANGLE first per HOOK_PLAYBOOK_ARTICLE_SPRINT.md section 0 (house default: F9 viral-entity delegation \u2014 make ONE real claude-opus-4-8 structured-output call with the article facts asking for ranked tool/tip picks + reasons + start-today choice; save the artifact with request_id; feature the 3 TTS-safe picks). THEN write the 6-beat script per the playbook: <=70 words, hook <=11 words stakes-word-first, one number per line, reversal in b4 (what the entity SKIPPED, receipt = the incumbent's price), withheld-crown CTA. Run the pre-flight checklist before any generation",
+        "Write the VO as ONE flowing spoken monologue per SPOKEN_VO_HUMANIZER.md (skill root): connected thoughts (so/and/'cause), one concrete you-benefit per item, varied sentence lengths, one emotion, CTA folded into the final thought. NEVER fragment chains or 'Label: description' constructions (the rejected v4-v6 style). ~85 words \u2248 33s; cut items rather than compress",
+        "Write numbers/brands phonetically for TTS ('one thirty seven', 'A.H. refs'); keep a display map for captions",
+        "Playwright (system chrome, mobile UA 540x960 dsf=2): full-page screenshot in <=3500-CSS-px clip SEGMENTS stitched with PIL \u2014 Chrome WRAPS full-page rasters >16384px (content repeats from top)",
+        "Record h1-h4 section y-offsets (CSS*2) for the beats' scroll targets",
+        "Capture proof 'receipt' pages (the external pricing/source pages that validate each claim) as viewport screenshots; crop receipts so they CANNOT contradict the VO (e.g. plan tier showing different limits)"
+      ],
+      "artifacts": [
+        "script.json",
+        "assets/screens/article_full.png",
+        "assets/screens/section_offsets.json",
+        "assets/overlays/proof_*.png"
+      ],
+      "paid_generation": false
+    },
+    {
+      "id": "vo",
+      "title": "VO \u2014 ElevenLabs (default) | MisoTTS (scale path, parked)",
+      "actions": [
+        "DEFAULT: ElevenLabs Brielle 6u6JbqKdaQy89ENzLSju, model eleven_v3, stability 0.35, similarity 0.75 (~$0.10/video at 85 words). Generate 2-4 takes, deliver to a listening board for owner approval on NEW voices/styles; at DFY scale reuse the approved settings",
+        "Slice the APPROVED take: hook = first sentence (cut midway to next word), body = remainder. The take IS the master audio \u2014 beat boundaries and captions come from its Whisper word timestamps (sequential last-word alignment)",
+        "Hook slice feeds Seedance as --reference-audio; keep the CLIP's native audio for the hook (Seedance clones the voice closely) and crossfade 0.10s into the real take at the seam \u2014 listen-check the voice match at the cut",
+        "Seam QC runs in approved-take mode: interior pauses are performance (owner approved them by ear) \u2014 only gate the hook->body seam (>=0.6s) and pathological runs (>1.5s)",
+        "PARKED \u2014 MisoTTS path: base checkpoint flattens prosody ~10-20% below any reference and turns hot references into pauses; usable again after a LoRA fine-tune on energetic creator speech (torchtune llama3_2 recipes adapt). Full lore: MISOTTS_RUNPOD_GUIDE.md \u00a7Prosody"
+      ],
+      "artifacts": [
+        "vo/<beat>.wav",
+        "vo/words_<beat>.json",
+        "vo/timeline.json"
+      ],
+      "paid_generation": true
+    },
+    {
+      "id": "avatar_hook",
+      "title": "Greenscreen Seedance hook clip (the ONLY fal cost)",
+      "actions": [
+        "FIRST build a pure-green character reference: gpt-image-2 images.edit from the character hero image \u2014 'same woman/man, head and shoulders, perfectly uniform flat vivid pure green chroma-key screen hex 00FF00, no shadows/gradient, crisp hair edges' (openai_image_tool.py --reference-image <hero> --size 1024x1536). Prompting Seedance for green WITHOUT this reference yields a desaturated green (~0x1D9556) that keys the SUBJECT translucent",
+        "ONE 5s 720p 9:16 reference-to-video clip FROM the green reference: prompt 'already standing in front of a chroma-key green screen, keep the EXACT same background (pure 00FF00, evenly lit)' + the exact hook line + an expression beat; --reference-audio vo/hook.wav --generate-audio",
+        "GENDER-MATCH the character to the bundled voice first (pitch-check: <165Hz male, >165Hz female)",
+        "KEEP the clip's native audio (reference audio clones the VOICE not timing); hook line <=11 words",
+        "QC: Whisper the clip (exact words), frame-check character + vivid flat green"
+      ],
+      "artifacts": [
+        "assets/hook_clip.mp4",
+        "vo/words_hookclip.json"
+      ],
+      "paid_generation": true
+    },
+    {
+      "id": "body_render",
+      "title": "Article sprint body (PIL frames, free)",
+      "actions": [
+        "Render 30fps frames: eased whip-scrolls (~0.38s, ease-out-cubic) between section targets, slow drift during holds, speed-proportional gaussian blur on whips (>2600 px/s)",
+        "Scroll targets put each section HEADING visible at top (~offset-130); receipt cards pop in below it (CARD_Y~360, scale 0.92->1.0 + fade, 0.28s) from beat_start+0.45",
+        "Receipt cards: 920px wide rounded-corner crops with source-domain label strip + drop shadow",
+        "CTA full-frame card with slow push-in (zoom 1.0->1.06) absorbs the audio tail",
+        "Concat body beats audio with 0.10s gaps; atempo <=1.05 if total exceeds 30s (never >6%)"
+      ],
+      "artifacts": [
+        "beats_timing.json",
+        "assets/body.mp4",
+        "assets/body_audio.wav",
+        "body_captions.json"
+      ],
+      "paid_generation": false
+    },
+    {
+      "id": "assemble_qc",
+      "title": "Assembly + QC",
+      "actions": [
+        "Body render covers the FULL master duration (title view holds under the hook; scroll starts when the head drops)",
+        "Chromakey the hook clip with TIGHT similarity + BINARY alpha: chromakey <corner-sampled hex>:0.09:0.04, then lut=a='if(gt(val,60),255,0)', then despill=green. NEVER widen similarity past ~0.10: neutral colors (white clothing, eye whites, teeth) sit ~0.18 from green in UV space and ghost at ~50% alpha inside a 0.16+0.08 blend zone (v4 bug). Binary alpha = clean CapCut-style cutout, which IS the reference look. Scale ~0.85 of master width, top ~y760/1920, one-frame --test render to tune placement",
+        "ALPHA QC GATE (automated, before composing): alphaextract a mid-clip frame; p10 alpha >=250 in THREE zones \u2014 face, eye band, AND the white-clothing zone (a face-only median passed while the blouse ghosted in v4); bg corners p90 <=5",
+        "Audio: clip native -> acrossfade 0.10s -> per-beat body VO, loudnorm I=-16:TP=-1.5:LRA=11",
+        "Captions: TWO ASS styles \u2014 hook words ABOVE the head (MarginV~1010), body words bottom band (MarginV=240); brand-fix replace map from Whisper spellings",
+        "Force limited-range yuv420p on the final mux (jpg-frame pipelines leak yuvj420p full-range): scale=in_range=full:out_range=limited,format=yuv420p + -color_range tv",
+        "ffmpeg_qc + contact sheet (EVERY beat's receipt must match its narration \u2014 re-check after ANY script edit), deliver to ~/Desktop, STOP the pod via REST API",
+        "Badge carries CONFLICT not category ('$139 vs $18', numerals, top third) and doubles as the mute-viewer hook; cut the hook clip so the head is mid-speech at frame 1 (first syllable <0.3s); CTA card echoes the hook's numerals for the loop-back"
+      ],
+      "artifacts": [
+        "final master mp4 on Desktop",
+        "job_state.json"
+      ]
+    }
+  ],
+  "tools": [
+    "tools/fal_seedance_video.py",
+    "tools/ffmpeg_qc.py"
+  ],
+  "providers": [
+    "self-hosted MisoTTS on RunPod (VO, ~$0.57/hr pod only while running)",
+    "fal.ai bytedance/seedance-2.0/reference-to-video (5s hook, only paid generation)",
+    "groq whisper-large-v3 (word timing + QC)",
+    "playwright + system chrome (article + receipt captures)",
+    "PIL + FFmpeg (body render + assembly)",
+    "runpod REST API (pod create/start/stop via RUNPOD_API_KEY in .env)"
+  ],
+  "routing_keywords": [
+    "about the article",
+    "article promo short",
+    "article receipts",
+    "article runthrough",
+    "article short",
+    "article sprint",
+    "cheap dfy short",
+    "dfy instagram",
+    "dfy short format",
+    "dfy youtube short",
+    "floating head",
+    "greenscreen head",
+    "head over article",
+    "hook plus article",
+    "misotts",
+    "misotts short",
+    "receipts short",
+    "scroll short",
+    "talking head over article",
+    "yapping"
+  ],
+  "routing_negative_keywords": [
+    "paid ad",
+    "long form",
+    "non-english",
+    "podcast"
+  ],
+  "script_shape": [
+    "Hook (<=11 words, stakes word first): the FIGHT the title doesn't contain (title shows WHAT, voice shows WHY IT MATTERS)",
+    "b1: artifact + RESULT thesis (not methodology) + plant the withhold tease",
+    "b2: the floor (free/cheapest baseline) \u2014 one number + its enemy",
+    "b3: the incumbent verdict + witness the receipt out loud ('pricing page, right there')",
+    "b4: the REVERSAL \u2014 best fact + strongest verb of the script",
+    "CTA: cash the withhold ('And number one beats all three. Article's in the bio.')"
+  ],
+  "qc_checks": [
+    "hook clip says the exact scripted words (Whisper) on a flat keyable green",
+    "bundled voice pitch-checked + gender-matched to the character",
+    "no babble tails (Whisper text == script; trim at last script word)",
+    "every receipt card matches ITS beat's narration (re-verify after script edits)",
+    "alpha QC gate passed: p10>=250 in face + eyes + white-clothing zones, bg corners keyed (no translucent subject)",
+    "head fully in frame at max lean-in; hook captions never overlap the head",
+    "final pix_fmt is limited-range yuv420p",
+    "pacing gate passed: body wps >= 2.3, max internal gap <= 0.55s"
+  ],
+  "deliverables": [
+    "1080x1920 master MP4 (loudnorm broadcast-safe, ~30s)",
+    "reusable per-beat scripts in the job dir",
+    "vo word jsons + beats_timing.json (beat map)"
+  ],
+  "compliance_notes": [
+    "NEVER use the owner's cloned voice for DFY content \u2014 bundled model voices only (owner decision 2026-06-11)",
+    "No spoken digital-avatar disclosure per owner decision; set the platform synthetic-media flag at upload",
+    "Receipt screenshots are evidence of public pages (pricing/source) \u2014 never fabricate or edit their numbers",
+    "User template videos are STRUCTURE-ONLY references; never reuse their pixels or wording",
+    "MisoTTS is English-only; non-English projects must stay on the ElevenLabs path"
+  ],
+  "cost_model_usd": {
+    "_verified": "fal.ai pricing page 2026-06-12: Seedance 2.0 reference-to-video = $0.3024/s standard, $0.2419/s fast (720p, audio included)",
+    "seedance_hook_8s_720p_standard": "2.42 (v7 as-built; 15-word hook needs ~7s speech)",
+    "seedance_hook_5s_720p_standard": "1.51 (hook <=11 words)",
+    "seedance_hook_5s_720p_fast": "1.21 (cheapest acceptable; fast tier maxes at 720p which we use anyway)",
+    "elevenlabs_vo_per_video": "0.07-0.12 (~500 chars on eleven_v3)",
+    "claude_picks_call_opus": "0.02",
+    "groq_whisper_qc": "0.01",
+    "gpt_image_green_reference": "one-time ~0.15 per character (amortized ~0)",
+    "article_capture_body_render_assembly": "0 (local/VPS)",
+    "total_per_video_as_built_v7": "~2.56",
+    "total_per_video_optimized": "~1.35 (5s fast-tier hook + short hook line)",
+    "lever": "the hook clip is 90%+ of cost and scales at $0.24-0.30 per SECOND of hook \u2014 keep hook lines short"
+  },
+  "notes_name_safety": "Avoid brands TTS mangles (Ahrefs -> 'Oz'/'IH'/'X'; SEMrush needs 'Sem-rush' + a pad word). Prefer beats on clean names; pad sentence-initial brands with 'And'; never two similar numbers in one line.",
+  "reference_implementation": "tmp/video_jobs/misotts_article_sprint/ \u2014 working scripts: capture_article_v2.py (segmented article screenshot + receipts), gen_vo.py (per-beat MisoTTS + pitch gate), transcribe_vo.py (Whisper QC), build_timeline.py, render_body.py (whip-scroll + cards), assemble_v2.py (chromakey composite + alpha gate); plus openai_image_tool.py at repo root for the pure-green character reference",
+  "docs": [
+    "SEEDANCE_AVATAR_ROI.md (WHY the avatar is default-off + the Goal-1 GEO core + the A/B to run)",
+    "SPOKEN_VO_HUMANIZER.md (script style rules \u2014 THE fix for robotic VO copy)",
+    "HOOK_PLAYBOOK_ARTICLE_SPRINT.md (angles + hook families + pre-flight)",
+    "AVATAR_HOOK_FORMAT_RUNBOOK.md at repo root (mechanics + gotchas)"
+  ],
+  "avatar_policy": "DEFAULT OFF (SEEDANCE_AVATAR_ROI.md, 2026-06-12): the Seedance avatar is ~90% of per-video cost, invisible to AI engines (they read transcript/title/description/schema, never pixels), and loses on retention-per-dollar to free text+motion+caption hooks. Render the avatar ONLY for a deliberate social-distribution variant AND only after an A/B (avatar vs no-avatar, same script) shows it beats the text hook on viewed-vs-swiped by enough to justify ~16x cost. Default render = no-avatar: screen-record body + VO + captions-from-word-1 + bold text/zoom hook (~$0.15).",
+  "goal1_geo_core": [
+    "Write ONE winner sentence \u2014 'The best <X> is <Winner>, because <one concrete number>' \u2014 and place it VERBATIM in 3 machine-readable surfaces: the blog article's opening box, the spoken VO intro (so it lands in the transcript), and the video description",
+    "Upload the corrected SRT (you already generate word timestamps) \u2014 don't rely on auto-captions",
+    "Title = 'Best <X> 2026' + winner name; description restates the winner in quotable plain text",
+    "VideoObject + Clip/chapter JSON-LD on the embed page (free, templatable; names the winner segment)",
+    "Higher-leverage than the video for Goal 1: the embedded blog ARTICLE \u2014 direct-answer listicle, comparison table, FAQ, visible last-updated date. For citations, a long-form companion (3-8min screen walkthrough) beats a Short ~94% vs ~6%"
+  ]
+}

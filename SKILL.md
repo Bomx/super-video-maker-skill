@@ -4,14 +4,14 @@ description: |
   End-to-end AI video production skill for agentic frameworks. Use when the
   user asks to make, edit, repurpose, caption, soundtrack, or export videos
   using HeyGen avatars, Seedance or ByteDance b-roll, OpenAI image generation
-  and editing, Remotion, HyperFrames, screen recordings, FFmpeg, captions,
-  ElevenLabs music, Suno, or social-video variants.
+  and editing, AI UGC ads, Remotion, HyperFrames, screen recordings, FFmpeg,
+  captions, ElevenLabs music, Suno, or social-video variants.
 metadata:
   requires:
     env:
       - HEYGEN_API_KEY
       - HEYGEN_AVATAR_ID
-      - REPLICATE_API_TOKEN
+      - FALAI_API_KEY
       - OPENAI_API_KEY
       - ELEVENLABS_API_KEY
 ---
@@ -24,8 +24,10 @@ Turns a video idea, script, product flow, screen recording, avatar brief, or
 existing long-form video into polished video assets. The skill can produce:
 
 - **Avatar Explainers** (`avatar-explainer`): proof-driven avatar videos with a synthetic presenter, screen recordings/source receipts, UI micro-stories, captions, and action takeaways,
+- **UGC AI Ads** (`ugc-ai-ad`): paid-social ads with a fictional AI creator, reference-image character consistency, Seedance 2.0 clips, ElevenLabs voice consistency, hook variants, captions, and direct-response CTAs,
+- **Motion Collage Explainers** (`motion-collage-explainer`): faceless one-idea explainer shorts built from a bold screen-print cutout collage still (`gpt-image-2`) animated into a living collage with Seedance 2.0, narrated in a calm "In a Nutshell" documentary voice (see `MOTION_COLLAGE_STYLE.md`),
 - avatar videos with HeyGen,
-- AI b-roll with Seedance 2.0 through Replicate,
+- AI b-roll with Seedance 2.0 through fal.ai,
 - generated or edited images with OpenAI image models,
 - screen recordings with cursor/event logs,
 - motion graphics in Remotion or HyperFrames,
@@ -33,10 +35,13 @@ existing long-form video into polished video assets. The skill can produce:
 
 ## Read these files when needed
 
+- `recipes/README.md` and `tools/video_recipes.py` for machine-readable video recipes (list, match, plan, validate).
 - `REFERENCE.md` for provider capabilities and routing decisions.
 - `FFMPEG_PLAYBOOK.md` for exact FFmpeg recipes.
 - `WORKFLOW_EXAMPLES.md` for full production examples.
 - `REMOTION_VIDEO_GUIDE.md` for Remotion motion-design rules.
+- `HYPERREALISTIC_IMAGE_SOP.md` for the 12-part framework that turns a reference image into a photorealistic, non-AI-looking UGC creator prompt. Read it before generating any creator still or hyperrealistic character.
+- `MOTION_COLLAGE_STYLE.md` for the `motion-collage-explainer` recipe: how to build a bold screen-print cutout collage still with `gpt-image-2`, animate it into a living collage with Seedance 2.0, and narrate it in a calm "In a Nutshell" documentary explainer voice. Read it before making any faceless collage/idiom/concept explainer short.
 
 ## Operating rules
 
@@ -59,7 +64,7 @@ existing long-form video into polished video assets. The skill can produce:
 16. **Build a visual hierarchy with non-colliding zones and a borderless PiP.** Avatar fullscreen for the hook beat. Avatar picture-in-picture for every other beat: **borderless, 24px rounded corners, soft drop shadow** — never a colored hard frame. Implementation: Pillow renders `pip_mask.png` (rounded-rectangle alpha mask) and `pip_shadow.png` (blurred dark shape) once per job; FFmpeg uses `chromakey -> scale -> alphamerge` to round the avatar's corners, then composites the shadow at offset `+4, +16` underneath. Default size 492x276 on a 1920x1080 master. **PiP corner adapts to caption alignment:** if captions are bottom-centered (default), put the PiP in the **top-right** at `x=W-pip_w-50, y=50`. Never place the PiP in the same band as the captions, and hide the PiP entirely during the outro CTA tail so the recap card owns the frame. Skip the static title card; open directly on the avatar fullscreen. Keep an outro recap card at the end with the action steps and a permanent disclosure footer.
 17. **Burn karaoke captions centered at the bottom.** Bold uppercase Arial Black ~64px, 2-3 word groups with the active word highlighted in yellow, white drop shadow + 5px outline. ASS style: `Alignment=2` (bottom-center), equal `MarginL=MarginR=80`, `MarginV=90`. Generate from the Whisper word JSON with the master offset applied. Do NOT default to lower-left — left-aligned captions look amateur and clash with disclosure overlays.
 18. **Loudness-normalize the master audio** to `I=-16:TP=-1.5:LRA=11` so the upload is broadcast-safe across YouTube, LinkedIn, X, and podcasts.
-19. **When Replicate Seedance is throttled or out of credit**, fall back in this order: (a) real source screenshots, UI mockups, stock footage, or typographic cards that directly explain the beat; (b) OpenAI `gpt-image-2` stills at `quality=high`, native 16:9 (`2048x1152`) + FFmpeg Ken Burns with scale-to-fill/crop; (c) `local_explainer_broll.py` only when it can render an actual UI/event/state change. Never fall back to abstract dark-cosmic, glowing, floating, or symbolic "AI" imagery.
+19. **Use fal.ai for Seedance 2.0 by default.** When fal Seedance is throttled or out of credit, fall back in this order: (a) Replicate Seedance only if `REPLICATE_API_TOKEN` is configured and fal is unavailable; (b) real source screenshots, UI mockups, stock footage, or typographic cards that directly explain the beat; (c) OpenAI `gpt-image-2` stills at `quality=high`, native 16:9 (`2048x1152`) + FFmpeg Ken Burns with scale-to-fill/crop; (d) `local_explainer_broll.py` only when it can render an actual UI/event/state change. Never fall back to abstract dark-cosmic, glowing, floating, or symbolic "AI" imagery.
 20. **Recover long HeyGen jobs by `video_id` instead of regenerating.** If the local poll times out, query the existing HeyGen job and download when complete to avoid double-charging credits.
 21. **Never loop b-roll inside a long beat.** If a Whisper-aligned beat is longer than the clip, either (a) generate a complementary b-roll for the second half, (b) hold the final frame with `tpad=stop_mode=clone:stop_duration=N` for overflows up to ~2 seconds, or (c) cross-cut with a Ken Burns still. A visible loop snap is more disorienting than a brief held frame.
 22. **Choose b-roll by beat purpose, not by prompt creativity. Prefer real over generated, always.** B-roll is decided by what the narration is doing in that moment, not by what is "cool to generate". Use this routing:
@@ -99,8 +104,36 @@ existing long-form video into polished video assets. The skill can produce:
 36. **Use modern editorial motion language.** Prefer fast UI inserts, source receipt cards, thin rounded callout boxes, cursor-driven reveals, split screens, headline montages, match cuts, before/after UI, and tight push-ins to exact phrases. Avoid generic stock people, repeated website zooms, slow Ken Burns-only sequences, decorative gradients, and any shot that merely "feels related" without explaining the sentence.
 37. **Run a b-roll layout QC/edit pass before final composition.** Generated images, UI cards, screenshots, and video b-roll are not approved just because they rendered. Before composing the master, run `tools/broll_layout_qc.py` on every b-roll asset to create guided review frames/contact sheets with safe-margin, caption-band, and avatar-PiP overlays. Open/read those frames and mark each asset as `pass`, `crop-edit`, `layout-edit`, `re-render`, or `replace`. Fail any asset where important text/faces are under the PiP, key content is in the caption band, typography feels cramped, spacing is off, edge tangents are awkward, or the visual job is unclear.
 38. **Fix b-roll layout problems in the cheapest order.** First crop/reframe (`scale-to-fill`, `crop`, `x_expr/y_expr`, zoompan start/end), then edit the layout/still (Pillow/Remotion/HTML), then re-render with a corrected prompt, then replace the shot. Do not accept "almost right" generated b-roll if spacing is obviously wrong; spacing/composition errors are taste errors.
+39. **Use `ugc-ai-ad` for paid-social UGC, not `avatar-explainer`.** Route TikTok/Reels/Shorts ad requests to the UGC recipe when the goal is conversion, app installs, lead capture, waitlist signups, or offer testing. Default to `9:16`, 15-45 seconds, handheld phone realism, fast captions, and one clear CTA.
+40. **Only use reference people with rights or user-provided permission.** A real person image may be used as a quality/style reference, but the output creator must be a new fictional character. Do not claim the reference person endorsed the product, do not recreate a public figure, do not preserve identity-level likeness, and do not use private photos unless the user owns or has permission to use them.
+41. **Build a UGC character bible before generation.** Save `character_card.json` with `creator_name`, fictional bio, age range, wardrobe, hair, skin tone, voice style, accent, camera energy, allowed claims, `visual_seed`, `voice_seed`, reference assets, and negative prompts. Use the same card across all ad variants.
+42. **Create the fictional creator with OpenAI image editing before Seedance.** Start from one licensed/user-provided real-person photo for photographic quality. Use OpenAI `gpt-image-2` at `quality=high` to transform it into a distinct fictional creator while retaining natural skin texture, lens realism, lighting, and image fidelity. Generate at least three references: hero face portrait, medium talking-to-camera frame, and wide environmental frame.
+42a. **Build every creator-still prompt with the Hyper-Realistic Image SOP.** Before calling `image_provider.py` for any fictional creator or hyperrealistic character, follow `HYPERREALISTIC_IMAGE_SOP.md`: study the reference, list its 5 most distinctive details, fill the 12-part framework (subject, skin texture, eyes/brows/nose/mouth, hair, fabric-level clothing, pose, environment, camera/lens, lighting, mood, anti-AI notes, negative prompt), and output the standard JSON. The anti-AI notes and negative-prompt items are the point — they are what stop the output from looking AI-generated (smooth poreless skin, symmetrical face, plastic hair, blurred jewelry, CGI fabric). Since `gpt-image-2` has no negative-prompt field, append those items as explicit "avoid / do NOT render" clauses in the positive prompt. Save the final JSON alongside the references in `assets/character/` and reuse it across every variant.
+43. **Use Seedance consistency controls deliberately.** For every UGC clip, pass the same `--seed`, the selected character reference images, and, when available, a short reference video or reference audio. Change only the shot action/camera prompt per beat. Do not regenerate a new face per scene. If the face drifts, re-run with fewer references, a tighter prompt, or a closer crop of the hero portrait.
+44. **Keep voice consistency separate from visual consistency.** Use ElevenLabs voice cloning/voice design or a locked voice ID for narration. Store `voice_id` and `voice_seed` in `character_card.json`. If using Seedance-generated audio, pass `--reference-audio` and QC for tone drift; for ads, prefer controlled ElevenLabs VO plus Seedance visual clips unless the native audio is intentionally part of the shot.
+44a. **For multi-clip Seedance-native audio, lock the first approved voice.** After the best hook/talking-head clip is approved, extract a short clean WAV from that clip and pass it as `--reference-audio` to every later Seedance clip. Reuse the same `--seed` unless there is a clear visual reason to vary it. Whisper the assembled master and compare voice drift across clip boundaries before delivery.
+45. **Never rescue a bad read with heavy speed compression.** If a voiceover must be time-fit by more than about 6%, rewrite the script shorter or regenerate the voice. If the fit exceeds 12%, it is a QC failure. For UGC where natural phone energy matters more than repeatable voice control, audition Seedance native audio (`--generate-audio --reference-audio`) against the locked external voice and keep the more human take.
+46. **Phone/UI shots must use real product pixels.** When a creator holds a phone, laptop, or dashboard, do not rely on generated readable UI. Use a product screenshot as an explicit reference and, when possible, track/composite the real screen in post. Blank phone screens, fake white screens, unreadable dashboards, and invented product text are QC failures.
+47. **UGC copy is direct-response, not explainer prose.** Use: pattern interrupt hook -> painfully specific problem -> personal discovery/demo -> product mechanism -> proof or believable result -> objection handling -> simple CTA. One ad = one angle, one promise, one next step. Avoid broad claims, unverifiable income/health promises, and fake testimonials.
+48. **Always write hook variants before producing paid assets.** Create at least 5 hooks across different families: confession, contrarian, problem-callout, receipt/proof, demo-first, curiosity gap, speedrun, and before/after. Pick 2-3 winners for production and keep the rest as variant scripts.
+49. **Run the reference-match quality gate before delivery.** For inspiration-based ads, run `tools/ad_quality_gate.py` after the final render using the reference analysis, shot plan, transcript, and any raw/final voice files. Inspect every dense risky window around face, hands, phone, UI, screen, CTA, captions, and product proof before showing the user.
+49a. **Competitor frames are analysis-only.** If a video is inspired by a competitor ad, use the competitor footage only to extract transcript timing, scene boundaries, shot intent, and pacing. Never pass competitor frames/videos as Seedance/OpenAI reference media, never composite competitor pixels into the final, and never ask a model to "match" a competitor frame. Convert each source scene into owned shot intent first: camera distance, action, beat purpose, and pacing; then generate only from owned creator references, owned product screenshots, or text prompts. If the user asks for a Seedance-native test, the only non-Seedance layer allowed is captions/subtitles unless the user explicitly approves product-screen compositing.
+50. **Make AI UGC look like a real phone capture, not a polished commercial.** Use natural room tone, small camera imperfections, hand movement, believable home/office/car environments, jump cuts, casual wardrobe, and creator-specific speech patterns. Avoid perfect studio lighting, overly smooth skin, fake influencer smiles, brand-perfect sets, and cinematic b-roll that breaks UGC believability.
+51. **Plan ad tests as batches.** For every UGC job, output a `variant_matrix.json` with hooks, first-frame text, creator reference, offer angle, CTA, seed, clip paths, and target platform. Produce minimum viable variants first: 3 hooks x 1 body, then scale winners into new bodies, creators, and CTAs.
 
 ## Standard workflow
+
+### Stage 0: Pick a recipe
+
+Before intake, list recipes and match the user goal:
+
+```bash
+python3 .agents/skills/super-video-maker/tools/video_recipes.py list
+python3 .agents/skills/super-video-maker/tools/video_recipes.py match --goal "<user request>"
+python3 .agents/skills/super-video-maker/tools/video_recipes.py plan --recipe <recipe_id> --goal "<user request>"
+```
+
+Default routing: news/tutorial masters → `avatar-explainer`; paid-social creator ads → `ugc-ai-ad`; SaaS demos → `screencast-demo` or `avatar-product-walkthrough`; podcast clips → `longform-repurpose`; faceless one-idea concept/idiom explainer shorts (cutout collage, "In a Nutshell" docu voice) → `motion-collage-explainer`.
 
 ### Stage 1: Intake
 
@@ -112,6 +145,8 @@ Collect:
 - source assets,
 - brand style,
 - call to action,
+- for ads: product/offer, landing page, target persona, pain point, desired conversion event, proof points, claims/compliance limits, and competitor examples,
+- for UGC ads: creator persona, real-person reference image rights, fictional-character direction, voice style, visual seed, voice seed, and number of hook variants,
 - whether the user wants avatar, faceless, screencast, or hybrid.
 
 Return a concise plan before generation.
@@ -122,6 +157,7 @@ Create:
 
 - spoken script,
 - visual shot list,
+- UGC ad angle matrix when `ugc-ai-ad` is selected,
 - source deck (each source asset has one unique editorial job),
 - visual job labels for every shot: proof / mechanism / consequence / action / transition,
 - b-roll prompts,
@@ -150,6 +186,90 @@ Visual brief shape for every beat:
 - **After state:** what the viewer now understands.
 - **Reject list:** lazy visuals that are banned for this beat (generic person at laptop, same hero page again, abstract AI brain, floating icons, etc.).
 
+### UGC AI Ad Recipe (`ugc-ai-ad`)
+
+Use this recipe when the viewer should feel like a real creator is giving a
+fast, believable recommendation, demo, complaint, or discovery.
+
+1. **Intake the offer.** Capture product, ICP, pain, desired action, allowed
+   claims, banned claims, proof assets, landing page, platform, aspect ratio,
+   duration, and target cost/test volume.
+2. **Write the ad angle matrix.** Create 3-5 angle rows, each with: hook
+   family, first-frame text, opening line, core pain, product mechanism, proof
+   point, objection handled, CTA, and compliance risk.
+3. **Pick the creator.** Use a user-provided or licensed real-person photo as
+   a photographic reference only. Define a distinct fictional creator:
+   different name, biography, styling, wardrobe, environment, and enough facial
+   differences to avoid identity recreation.
+4. **Edit the reference into a new fictional character.** Use
+   `tools/image_provider.py edit` with OpenAI `gpt-image-2`, `quality=high`,
+   `input_fidelity=high`, and the strongest available source image. Build the
+   prompt with the 12-part `HYPERREALISTIC_IMAGE_SOP.md` framework (see rule
+   42a): specify skin texture and where pores/imperfections sit, fabric-level
+   wardrobe, lighting by color temperature, camera/lens, and the anti-AI notes
+   + negative-prompt clauses that keep it from looking AI-generated. Prompt for
+   a realistic UGC creator, natural phone-camera texture, believable skin,
+   no beauty-filter look, no brand logos, and no retained identity. Save the
+   approved output as `assets/character/creator_hero.png` and the SOP JSON
+   prompt next to it for reuse across variants.
+5. **Generate a reference set.** From the approved hero image, create:
+   `creator_face.png`, `creator_medium_phone.png`,
+   `creator_wide_environment.png`, and optionally a 2-3 second idle reference
+   video. Keep these with `character_card.json`.
+6. **Lock seeds and voice.** Store `visual_seed` for Seedance and `voice_seed`
+   or `voice_id` for ElevenLabs. Reuse the same seed/reference set for every
+   clip in a batch; vary only shot actions, hook text, and CTA.
+7. **Produce clips with Seedance 2.0 through fal.ai.** Use
+   `tools/fal_seedance_video.py generate --mode reference --seed <visual_seed>`
+   plus `--reference-image` for the approved creator references. Pass
+   `--reference-audio` when native Seedance audio/lip movement is intentional,
+   or use a separate ElevenLabs voice track for controlled ad narration. Prompt
+   each beat as a phone-native scene: creator talking to camera, holding
+   product, screen demo, over-the-shoulder app use, reaction shot,
+   receipt/proof shot, CTA close.
+8. **Assemble like a UGC ad.** First frame must communicate the hook before
+   the viewer reads the caption. Use jump cuts, pattern interrupts, large
+   bottom captions, product/UI inserts, quick proof overlays, and no dead air.
+9. **QC for believability, audio, visuals, and compliance.** Reject face drift,
+   too-polished skin, uncanny hands/teeth, lip-sync mismatch, fake platform
+   logos, blank phone screens, unreadable/generated product UI, impossible
+   product claims, and any testimonial wording that implies a real customer
+   experience unless the user provided that experience. For reference-inspired
+   ads, run `tools/ad_quality_gate.py` and inspect the second-by-second
+   reference/candidate sheet plus all dense risky-window sheets.
+10. **Export test variants.** Render `9:16` masters first, plus `1:1` or `4:5`
+    if requested. Save `variant_matrix.json`, final MP4s, captions, character
+    references, seeds, prompts, and QC notes in the job folder.
+
+UGC hook families to use before writing the body:
+
+- **Confession:** "I almost didn't try this because..."
+- **Contrarian:** "Stop doing <common behavior> if you want <outcome>."
+- **Problem-callout:** "If <pain> keeps happening, check this first."
+- **Receipt/proof:** "I tested <thing> for <timeframe>, here is what changed."
+- **Demo-first:** "Watch what happens when I do <specific action>."
+- **Speedrun:** "I fixed <pain> in <short timeframe> with three steps."
+- **Before/after:** "This was my <messy state>; this is it after <product/action>."
+- **Curiosity gap:** "The weird part is not <obvious thing>; it is <specific mechanism>."
+
+UGC body patterns:
+
+- **Pain -> tiny demo -> payoff -> CTA.**
+- **Old way -> new way -> proof -> CTA.**
+- **Mistake -> correction -> product mechanism -> CTA.**
+- **Skeptic -> test -> result -> objection -> CTA.**
+
+Seedance prompt skeleton:
+
+```text
+Handheld vertical phone video. Fictional UGC creator from reference images,
+same face, same hair, same wardrobe family, natural skin texture, no beauty
+filter. <specific beat action>. Real <home office / kitchen / parked car /
+desk> environment, natural light, casual speech energy, slight handheld motion,
+believable phone-camera exposure. No logos, no subtitles in the footage, no
+perfect studio lighting, no face morphing, no extra people.
+```
+
 After HeyGen renders the avatar, immediately:
 
 1. Extract the avatar audio with FFmpeg (`-vn -acodec libmp3lame`).
@@ -164,10 +284,11 @@ Use the routing rules:
 
 - HeyGen for presenter/avatar clips.
 - Seedance 2.0 for cinematic b-roll and generated motion.
-- OpenAI image generation/editing for storyboards, stills, thumbnails, and inserts.
+- Seedance 2.0 reference-image + seed mode for UGC character-consistent clips.
+- OpenAI image generation/editing for storyboards, stills, thumbnails, inserts, and fictional UGC creator references.
 - `agent_browser_recorder.py` for coherent agent-operated browser footage.
 - `screen_recorder.py` for lower-level product walkthrough recordings.
-- `local_explainer_broll.py` as a no-credit fallback when Replicate/Seedance is unavailable.
+- `local_explainer_broll.py` as a no-credit fallback when fal/Seedance is unavailable.
 - ElevenLabs for voiceover and music when available.
 
 ### Stage 4: Timeline assembly
@@ -193,8 +314,12 @@ Always check:
 ## Main tools
 
 ```bash
+python3 .agents/skills/super-video-maker/tools/video_recipes.py list
+python3 .agents/skills/super-video-maker/tools/video_recipes.py test
 python3 .agents/skills/super-video-maker/tools/heygen_client.py
-python3 .agents/skills/super-video-maker/tools/replicate_video.py generate --prompt "cinematic b-roll..." --duration 7 --resolution 1080p --aspect-ratio 16:9
+python3 .agents/skills/super-video-maker/tools/fal_seedance_video.py generate --mode reference --prompt "@Image1 handheld UGC creator..." --duration 7 --resolution 1080p --aspect-ratio 16:9 --reference-image assets/character/creator_hero.png
+python3 .agents/skills/super-video-maker/tools/fal_seedance_video.py generate --mode reference --prompt "@Image1 and @Image2 show the same fictional creator. Handheld vertical phone video..." --duration 5 --resolution 720p --aspect-ratio 9:16 --seed 18427 --reference-image assets/character/creator_hero.png --reference-image assets/character/creator_medium_phone.png
+python3 .agents/skills/super-video-maker/tools/image_provider.py edit --reference-image real_person_reference.jpg --prompt "Create a distinct fictional UGC creator..." --size 1024x1536 --quality high --input-fidelity high --model gpt-image-2
 python3 .agents/skills/super-video-maker/tools/agent_browser_recorder.py
 python3 .agents/skills/super-video-maker/tools/local_explainer_broll.py
 python3 .agents/skills/super-video-maker/tools/screen_recorder.py
@@ -221,7 +346,7 @@ RESULT: {"status":"failed","stage":"asset_generation","error":"friendly explanat
 ## Provider defaults
 
 - Avatar: HeyGen.
-- AI video b-roll: Replicate `bytedance/seedance-2.0`.
+- AI video b-roll: fal.ai `bytedance/seedance-2.0/reference-to-video` or `bytedance/seedance-2.0/fast/reference-to-video`.
 - Images: OpenAI image generation/editing.
 - Voice: ElevenLabs.
 - Music: ElevenLabs Music first, then Replicate or Suno adapters if configured.

@@ -1,0 +1,120 @@
+{
+  "id": "motion-collage-explainer",
+  "name": "Motion Collage Explainer",
+  "version": "1.0.0",
+  "description": "One-idea explainer short built from a bold screen-print cutout collage still (gpt-image-2) animated into a living collage with Seedance 2.0, narrated in a calm documentary 'In a Nutshell' explainer voice. No presenter, no screen recording.",
+  "best_for": [
+    "single-concept explainer shorts (idioms, mental models, 'why does X happen')",
+    "faceless docu-style YouTube Shorts / Reels / TikTok",
+    "brand/SEO concept videos with a curious explainer voiceover",
+    "poster-style motion graphics without a real screenshot to prove"
+  ],
+  "not_for": [
+    "source-proof journalism or news teardowns",
+    "phone-native UGC creator ads",
+    "SaaS screen-recording demos",
+    "anything that needs a talking-head presenter"
+  ],
+  "platforms": ["youtube", "youtube_shorts", "tiktok", "instagram", "linkedin"],
+  "aspect_ratios": ["9:16", "16:9", "1:1"],
+  "duration_seconds": { "min": 15, "max": 60, "target": 32 },
+  "stages": [
+    {
+      "id": "intake",
+      "title": "Concept and script",
+      "actions": [
+        "Pick ONE concept, idiom, or 'simple question' to explain",
+        "Write the docu explainer VO per MOTION_COLLAGE_STYLE.md (open on a question/scenario, name the concept, one analogy, takeaway, soft CTA)",
+        "Split into 3-6 beats, one poster per beat",
+        "Lock the video's single background color, outline weight, and label style"
+      ],
+      "artifacts": ["script.txt", "beat_list.json"]
+    },
+    {
+      "id": "stills",
+      "title": "Collage poster stills",
+      "actions": [
+        "Build each poster with image_provider.py generate (gpt-image-2, 1024x1536 for 9:16) using the MOTION_COLLAGE_STYLE.md prompt formula",
+        "Grayscale halftone cutout subject on a flat saturated background, torn-paper label, 2-4 flat accent shapes",
+        "Regenerate or burn the label in post if the model typography is garbled",
+        "Keep every beat visually consistent as one series"
+      ],
+      "artifacts": ["output_images/collage_beat*.png"],
+      "paid_generation": true
+    },
+    {
+      "id": "animate",
+      "title": "Living-collage motion",
+      "actions": [
+        "Animate each approved still with fal_seedance_video.py --mode image (image-to-video) using the still as the reference",
+        "Prompt subtle living-collage motion only: parallax, gentle bob, drifting shapes, one literal concept motion; no scene change, no realify",
+        "4-6s per beat, 1080p, aspect matches target; fall back to FFmpeg Ken Burns + shape parallax if Seedance realifies the collage"
+      ],
+      "artifacts": ["assets/beats/beat*.mp4"],
+      "paid_generation": true
+    },
+    {
+      "id": "assemble",
+      "title": "VO, captions, concat",
+      "actions": [
+        "Generate the ElevenLabs explainer VO, Whisper-transcribe for word timing",
+        "Beat-lock every collage cut to sentence breaks",
+        "Concat beats, add centered karaoke captions clear of the torn-paper label band",
+        "Loudness-normalize to I=-16:TP=-1.5:LRA=11"
+      ],
+      "artifacts": ["final/vertical_9x16.mp4", "final/captions.ass"]
+    },
+    {
+      "id": "qc",
+      "title": "QC",
+      "actions": [
+        "Confirm every frame still reads as a flat printed collage (no realify, no glow/neon/3D/gradient)",
+        "Check label legibility, consistent series look, loop-safe motion",
+        "Run ffmpeg_qc.py (yuv420p h264 aac, no black frames at joins)"
+      ],
+      "artifacts": ["final/vertical_9x16.mp4"]
+    }
+  ],
+  "tools": [
+    "tools/video_orchestrator.py",
+    "tools/image_provider.py",
+    "tools/fal_seedance_video.py",
+    "tools/video_captioner.py",
+    "tools/music_provider.py",
+    "tools/ffmpeg_qc.py"
+  ],
+  "providers": {
+    "stills": "openai_gpt_image_2",
+    "motion": "fal_seedance_image_to_video",
+    "voice": "elevenlabs",
+    "music": "elevenlabs_or_suno",
+    "compose": "ffmpeg"
+  },
+  "routing_keywords": [
+    "motion collage",
+    "cutout collage",
+    "halftone",
+    "in a nutshell",
+    "kurzgesagt style",
+    "docu explainer short",
+    "idiom video",
+    "concept explainer",
+    "risograph",
+    "screen-print poster"
+  ],
+  "routing_negative_keywords": ["heygen avatar", "screen recording demo", "ugc creator", "source proof"],
+  "script_shape": ["question_or_scenario", "name_the_concept", "one_analogy", "takeaway", "soft_cta"],
+  "visual_jobs": ["mechanism", "consequence", "transition"],
+  "qc_checks": [
+    "every frame reads as a flat printed collage, not realified",
+    "no dark-cosmic / neon / glow / 3D / gradient AI-slop",
+    "label legible and series look consistent across beats",
+    "subtle loop-safe motion, no visible clip loop snap",
+    "captions synced to Whisper timing and clear of the label band"
+  ],
+  "deliverables": ["final/vertical_9x16.mp4", "final/captions.ass", "job_state.json"],
+  "compliance_notes": [
+    "Generate the collage from the prompt; never pass another brand's frames as image references.",
+    "Do not invent statistics for an explainer; ground any real claim."
+  ]
+}
