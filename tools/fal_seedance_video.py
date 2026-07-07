@@ -93,19 +93,38 @@ def upload_if_local(fal_client, value: str, upload_repository: str) -> str:
     path = Path(value).expanduser().resolve()
     if not path.exists():
         raise FileNotFoundError(f"reference file not found: {value}")
-    log(f"[fal-seedance] upload {path.name} repository={upload_repository}")
-    try:
-        return fal_client.upload_file(path, repository=upload_repository)
-    except Exception as exc:  # noqa: BLE001
-        detail = error_detail(exc)
-        response_text = str(detail.get("response_text") or "")
-        if "Exhausted balance" in response_text:
-            raise RuntimeError(
-                "fal.ai rejected the upload because the account balance is exhausted. "
-                "Top up at fal.ai/dashboard/billing, then retry. "
-                f"Raw response: {response_text}"
-            ) from exc
-        raise RuntimeError(f"fal.ai upload failed: {json.dumps(detail)}") from exc
+
+    # Try the requested repository first, then fall back through the others.
+    # fal's legacy "cdn"/"fal" storage endpoints have become unreliable
+    # (DNS failures / HTTP 400 "Invalid storage type"); "fal_v3"
+    # (v3.fal.media) is the current one. Auto-falling-back keeps the tool
+    # working when the requested repository is down.
+    order = [upload_repository] + [
+        r for r in ("fal_v3", "cdn", "fal") if r != upload_repository
+    ]
+    last_detail: dict[str, Any] = {}
+    for repo in order:
+        log(f"[fal-seedance] upload {path.name} repository={repo}")
+        try:
+            return fal_client.upload_file(path, repository=repo)
+        except Exception as exc:  # noqa: BLE001
+            detail = error_detail(exc)
+            last_detail = detail
+            response_text = str(detail.get("response_text") or "")
+            if "Exhausted balance" in response_text:
+                # A billing block fails identically on every repository; stop now.
+                raise RuntimeError(
+                    "fal.ai rejected the upload because the account balance is exhausted. "
+                    "Top up at fal.ai/dashboard/billing, then retry. "
+                    f"Raw response: {response_text}"
+                ) from exc
+            log(
+                f"[fal-seedance] upload via {repo} failed: "
+                f"{detail.get('message')}; trying next repository"
+            )
+    raise RuntimeError(
+        f"fal.ai upload failed for all repositories {order}: {json.dumps(last_detail)}"
+    )
 
 
 def choose_model(args: argparse.Namespace) -> str:
@@ -254,12 +273,14 @@ def build_parser() -> argparse.ArgumentParser:
     gen.add_argument("--reference-audio", action="append", help="Local path or URL. Repeat to add up to 3 audio clips.")
     gen.add_argument(
         "--upload-repository",
-        default=os.getenv("FAL_UPLOAD_REPOSITORY", "cdn"),
+        default=os.getenv("FAL_UPLOAD_REPOSITORY", "fal_v3"),
         choices=["cdn", "fal", "fal_v3"],
         help=(
-            "Repository for local reference uploads. Defaults to cdn because "
-            "fal_v3 requires the storage auth token endpoint and can fail with "
-            "less actionable 403s when billing is locked."
+            "Repository for local reference uploads. Defaults to fal_v3 "
+            "(v3.fal.media); the tool auto-falls back through the other "
+            "repositories if the first upload fails. The legacy cdn/fal "
+            "storage endpoints have become unreliable (DNS failures / "
+            "'Invalid storage type')."
         ),
     )
     gen.add_argument("--aspect-ratio", default="9:16", choices=["auto", "21:9", "16:9", "4:3", "1:1", "3:4", "9:16"])
