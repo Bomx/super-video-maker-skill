@@ -1,0 +1,115 @@
+{
+  "id": "review-conquest-compilation",
+  "name": "Review-Conquest Compilation",
+  "version": "1.0.0",
+  "description": "Faceless VO montage of REAL, verified competitor reviews targeting the '<competitor> reviews' keyword, that names the recurring complaints, positions the user's own business as the alternative, then appends the user's own customer testimonial reel and ends on the user's CTA.",
+  "best_for": [
+    "ranking for a competitor's '<competitor> reviews' / '<competitor> alternative' keyword",
+    "honest comparative / conquest marketing from real sourced reviews",
+    "turning a competitor's own critical reviews into your top-of-funnel proof"
+  ],
+  "not_for": [
+    "competitors with little or no genuine critical-review volume (would require fabrication)",
+    "attacking a person rather than comparing products",
+    "any claim the user's product cannot truthfully back"
+  ],
+  "platforms": ["youtube", "youtube_shorts", "landing_page"],
+  "aspect_ratios": ["16:9", "9:16"],
+  "duration_seconds": { "min": 90, "max": 360, "target": 180 },
+  "stages": [
+    {
+      "id": "recon",
+      "title": "Confirm real reviews exist",
+      "actions": [
+        "WebSearch to confirm the competitor is real and where its reviews live",
+        "Stop if there is no genuine critical-review volume"
+      ],
+      "artifacts": ["recon.json"]
+    },
+    {
+      "id": "research_verify",
+      "title": "Sweep every review surface, then adversarially verify",
+      "actions": [
+        "Fan out finders: Trustpilot, G2/Capterra, app stores, Reddit/forums, review blogs, YouTube, X/LinkedIn",
+        "Extract verbatim quotes with author, date, rating, sentiment, theme, and exact source URL",
+        "Drive a real Chrome session for sites that 403 automated fetches (Trustpilot) via star-filtered views",
+        "Adversarially verify every critical quote; default to reject if not corroborated verbatim"
+      ],
+      "artifacts": ["reviews_confirmed.json"]
+    },
+    {
+      "id": "synthesize_script",
+      "title": "Themes, mapping, and script",
+      "actions": [
+        "Cluster confirmed reviews into 4-6 themes",
+        "Map each theme to a TRUE strength of the user's business",
+        "Write an honest sentiment breakdown and a fast VO script ending on the testimonial handoff",
+        "Show the user the verified reviews + script before any paid generation"
+      ],
+      "artifacts": ["script.txt", "shot_list.json"]
+    },
+    {
+      "id": "produce",
+      "title": "Screenshots, VO, captions, clips",
+      "actions": [
+        "Screenshot the REAL review pages (never generate a fake review screenshot); brand lightly with VERIFIED tag + on-screen source",
+        "Generate ElevenLabs VO and beat-locked karaoke captions",
+        "Ken Burns on screenshots / gentle zoom on cards; cut every 3-6s on screenshots, 2-4s on cards"
+      ],
+      "artifacts": ["assets/shots/", "assets/vo.mp3", "captions.ass"],
+      "paid_generation": true
+    },
+    {
+      "id": "assemble",
+      "title": "Three-part concat with the user's reel appended",
+      "actions": [
+        "Part A = teardown clips + captions + VO (fade in, no fade out)",
+        "Part B = the user's testimonial reel appended with its own audio, loudnorm-matched, lightly branded",
+        "Part C = the user's silent end-card/CTA, fade to black",
+        "Normalize all parts to h264/yuv420p/1920x1080/30fps + aac/48k/stereo and concat"
+      ],
+      "artifacts": ["final/reviews_master.mp4"]
+    },
+    {
+      "id": "qc_package",
+      "title": "QC and keyword packaging",
+      "actions": [
+        "Verify audio in every segment, seams, ~-16 LUFS, no black frames (ffmpeg_qc)",
+        "Keyword-led title, description that restates the keyword and states reviews are real + sourced, chapters, tags, hook thumbnail"
+      ],
+      "artifacts": ["final/reviews_master.mp4", "metadata.md"]
+    }
+  ],
+  "tools": [
+    "tools/elevenlabs_voice.py",
+    "tools/video_captioner.py",
+    "tools/ffmpeg_qc.py",
+    "tools/screen_recorder.py"
+  ],
+  "providers": {
+    "voice": "elevenlabs",
+    "captions": "whisper_or_elevenlabs_timestamps",
+    "screenshots": "real_browser_chrome",
+    "compose": "ffmpeg"
+  },
+  "routing_keywords": [
+    "competitor reviews",
+    "reviews video",
+    "review compilation",
+    "review conquest",
+    "alternative to",
+    "compile reviews",
+    "trustpilot reviews video",
+    "testimonials appended"
+  ],
+  "routing_negative_keywords": ["avatar explainer", "ugc creator", "generated b-roll", "product demo"],
+  "script_shape": ["hook", "setup", "gap-beats-with-real-quotes", "turn", "the-alternative", "testimonial-handoff", "cta"],
+  "visual_jobs": ["proof", "consequence", "action", "transition"],
+  "qc_checks": [
+    "only real verified attributable reviews on screen",
+    "honest about the competitor's overall rating",
+    "real screenshots, never generated review UI",
+    "audio present across teardown + appended reel + end card"
+  ],
+  "deliverables": ["final/reviews_master.mp4", "captions.ass", "reviews_confirmed.json", "metadata.md"]
+}

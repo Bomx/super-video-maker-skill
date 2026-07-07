@@ -42,6 +42,7 @@ existing long-form video into polished video assets. The skill can produce:
 - `REMOTION_VIDEO_GUIDE.md` for Remotion motion-design rules.
 - `HYPERREALISTIC_IMAGE_SOP.md` for the 12-part framework that turns a reference image into a photorealistic, non-AI-looking UGC creator prompt. Read it before generating any creator still or hyperrealistic character.
 - `MOTION_COLLAGE_STYLE.md` for the `motion-collage-explainer` recipe: how to build a bold screen-print cutout collage still with `gpt-image-2`, animate it into a living collage with Seedance 2.0, and narrate it in a calm "In a Nutshell" documentary explainer voice. Read it before making any faceless collage/idiom/concept explainer short.
+- `REVIEW_VIDEO_PLAYBOOK.md` + `commands/review-video.md` for the `review-conquest-compilation` recipe (`/review-video`): a faceless VO montage of REAL, verified competitor reviews targeting the "<competitor> reviews" keyword, that names the recurring complaints, positions **the user's own business** as the alternative, then appends the user's own testimonial reel. Read it before making any competitor-review / comparison / conquest video. The business at the end is a variable — never hardcode a specific company.
 
 ## Operating rules
 
