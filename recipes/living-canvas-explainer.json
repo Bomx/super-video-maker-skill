@@ -1,0 +1,148 @@
+{
+  "id": "living-canvas-explainer",
+  "name": "Living Canvas Product Explainer",
+  "version": "1.0.0",
+  "description": "Boutique-grade 16:9 SaaS launch/explainer built as ONE continuous living canvas: almost zero hard cuts, element-level pacing (a meaningful beat every 2.0-2.5s), a virtual camera that punches into persistent UI cards on the exact VO word, causal physics on every element (rank-sort shuffles, gravity rain, squash-stretch, transformation chains where scene B is born from scene A's matter), a 10-15s first-person story cold-open with emotional VO and a visual punchline, three-band music (mundane jazz bed -> hard-stop silence under the joke -> orchestral score at the thesis cut), a 30-60 event beat-locked SFX bus, and Sharp Tag data badges instead of template pills. Implemented in Remotion as a single flat actor timeline beat-locked to Whisper word timestamps, mixed in FFmpeg. Read LIVING_CANVAS_PLAYBOOK.md before any work: every duration, zoom factor, spring constant, and failure mode is specified there.",
+  "best_for": [
+    "SaaS product launch videos and homepage explainers that must feel like a top boutique motion studio made them",
+    "positioning-driven launches where a story cold-open + humor earns the pitch (character VO -> punchline -> thesis slam)",
+    "feature walkthroughs told as camera journeys across persistent UI mockups (punch-ins synced to VO words)",
+    "16:9 masters for landing pages, YouTube, Product Hunt, with ad cutdowns derived later"
+  ],
+  "not_for": [
+    "paid-social UGC conversion ads (use ugc-ai-ad)",
+    "talking-head content (use avatar-explainer or captioned-talking-head)",
+    "real-screen product demos (use screencast-demo)",
+    "quick single-scene motion graphics (use motion-graphics)"
+  ],
+  "platforms": ["youtube", "landing_page", "product_hunt", "linkedin", "x_twitter"],
+  "aspect_ratios": ["16:9"],
+  "duration_seconds": {"min": 45, "max": 75, "target": 58},
+  "stages": [
+    {
+      "id": "reference_study",
+      "title": "Reverse-engineer the target style at frame level",
+      "actions": [
+        "Download 4-8 reference explainers (yt-dlp, <=1080p mp4)",
+        "Measure hard-cut statistics: ffmpeg select='gt(scene,0.22)' -> expect 0-3 cuts per 60s; the pace lives in element choreography, not editing",
+        "Coarse pass: 2fps 4x4 contact sheets to LOCATE the 3-6 most choreographed sequences per video",
+        "Dense pass: 8fps 6x4 sheets over each 4-10s sequence; reconstruct second-by-second timelines distinguishing ELEMENT motion vs CAMERA motion vs NEW LAYERS, with zoom-factor estimates and VO-word sync",
+        "Generalize into a numeric style bible (pacing table, camera state machine, FX catalog) BEFORE writing any code; skip this stage only if reusing the numbers already in LIVING_CANVAS_PLAYBOOK.md"
+      ],
+      "artifacts": ["style_bible.md", "choreography notes"],
+      "paid_generation": false
+    },
+    {
+      "id": "script_story_vo",
+      "title": "Script, story cold-open, and beat-locked VO",
+      "actions": [
+        "Write the arc: story cold-open (10-15s, first person, emotional, visual punchline) -> dark-turn thesis line (THE hard cut) -> product reveal -> 3-4 feature chapters as clipped 2-second clauses -> payoff beat with one cheeky microcopy aside -> proof -> CTA with a typographic joke (strike-through)",
+        "Announcer VO: energetic TTS read of the pitch half; story VO: expressive TTS with emotion tags ([tired][excited][sighs]...) at stability ~0.35 style ~0.6",
+        "MANDATORY silence surgery on tagged reads (they render 40-60% dead air): silenceremove stop_duration=0.26 threshold=-38dB + atempo 1.08, then Whisper and CUT A WHOLE BEAT if the story still exceeds 15s (dropping the 'hope' beat so payoff follows action is usually funnier)",
+        "Whisper the final audio (word timestamps) and derive EVERY frame number from words: wordAt(t)=round(t*30). The audio drives the timeline; a new voice means re-locking everything",
+        "Keep the story voice intimate and the announcer confident; cap the loudness step at the handoff to ~7-8 dB (lift story VO ~+3 dB in the mix)"
+      ],
+      "artifacts": ["script.md", "vo_story.mp3", "vo_main.mp3", "vo_words.json"],
+      "paid_generation": true
+    },
+    {
+      "id": "composition",
+      "title": "Remotion single flat actor timeline",
+      "actions": [
+        "One composition file: every element is an actor IIFE with enter/exit frames in a central T object; no scene wrappers, no Sequence grouping",
+        "Copy the motion helper library from the playbook verbatim: spr (d11/s210), actor, settle (micro-bounce on EVERYTHING that lands), slotAt (rank-sort shuffles), camRig (d16/s250 punches ~0.3s + 4%/s creep + velocity blur with 3.5px dead zone), shakeAt, deterministic rnd, typeOn",
+        "Per feature beat implement the S0-S7 camera state machine: oversized entrance settle -> hold with creep -> commit punch 1.3-1.4x centered on the sub-region the VO names -> creep-hold -> extraction punch 1.66-2.2x or zero-zoom pan -> FX burst with camera LOCKED -> accelerating exit ramp -> asymmetric whip-out",
+        "Give every beat ONE distinct causal mechanic from the catalog (tip-over fall, gravity rain, vacuum spiral, debris scatter, squash-stretch drop, pendulum swing, click thump, arc emission, cell drops, wire-draw, convergence beams, evidence-mounted claims, typographic strike) - never repeat one",
+        "Layout reflow: absolute-positioned rows at animated slot positions inside height-animated containers; width-push chips; yield when a second card claims space; chat push-up; the card physically GROWS",
+        "1-2 transformation chains max (gather -> flick -> orbit r205 -> collapse -> Flash+Ring+Sparks+shake -> next hero born 0.12->1 with brightness flare), 20s apart, on the two most important handoffs",
+        "Design system: Satoshi-class sans (900 headlines via local TTF + @remotion/fonts), Sharp Tag split-cell data badges (3px radius, mono value cell - NEVER glowing pills), ghost chapter titles at 4-6% opacity, 44px drifting grid + accent blobs, dark world with glowing horizon line, 3D-tilted power cards (perspective 1200-1400px, rotateX 12-16, rotateY 8-14, sin wobble) that UNTILT flat when the camera punches",
+        "Late story/section swaps: use the timeline-splice technique (frame = useCurrentFrame() - SHIFT) so downstream choreography keeps its numbers; gate replaced sections; run backgrounds on absolute frame"
+      ],
+      "artifacts": ["src/<Composition>.tsx", "T timeline object", "public/fonts/*.ttf"],
+      "paid_generation": false
+    },
+    {
+      "id": "audio_stack",
+      "title": "Three-band music + SFX bus",
+      "actions": [
+        "Generate the mundane bed (~12s elevator jazz: brushed drums, walking bass, noodling piano, naive office mood) and the score (cinematic orchestral, steady dynamics, no vocals) via text-to-music",
+        "Band structure: jazz 0 -> punchline-appear frame (hard-stop, 0.2s fade) -> SILENCE under the punchline read -> orchestral enters at the dark cut via adelay with 1s fade-in",
+        "NEVER sidechain-duck: flatten the score with acompressor (-24dB/4:1/25/450/makeup 3) + static EQ carve (1.8kHz -6dB, 350Hz -2dB) + constant volume 0.16; target music 10-11 dB under VO",
+        "Generate a 9-effect SFX kit via text-to-SFX (min 0.5s each): whooshes short/deep, click, typing, pop, glitch, riser, impact, chime",
+        "Map 30-60 beat-locked events (section whips 0.45, punch-ins 0.22 trimmed, shuffles 0.15, risers into slams, impacts on bursts, typing under every type-on, clicks, ~10 pops, chimes) and build the bus with a generated ffmpeg filter_complex_script (asplit per usage, atrim/afade/volume/adelay per instance, amix normalize=0)",
+        "Verify SFX placement with windowed volumedetect at event times vs silent windows"
+      ],
+      "artifacts": ["music_bed.mp3", "music_score.mp3", "sfx/*.mp3", "sfx_bus.wav", "sfx_filter.txt"],
+      "paid_generation": true
+    },
+    {
+      "id": "render_qc_mix",
+      "title": "Probe-QC loop, render, mix, verify",
+      "actions": [
+        "Probe-still QC loop: render 10-20 single frames at every punch, shuffle mid-flight, FX peak, and transition; READ each image and fix before any full render",
+        "If the project lives in a cloud-synced folder, rsync to local tmp (exclude node_modules) and build there; render with --concurrency=4 --timeout=120000 (local fonts delayRender-timeout at concurrency 8)",
+        "Mix in FFmpeg with -c:v copy (4 stems: spliced VO, bed, score, sfx bus) -> loudnorm I=-16:TP=-1.5:LRA=11",
+        "Verify: duration, ebur128 I/LRA, volumedetect at splice points, proof frames extracted from the ACTUAL export",
+        "Run the ship-gate checklist in the playbook (cuts, holds, stagger, blur, mechanics uniqueness, reflow, cursor targets, accent discipline, LUFS); watch a 2fps contact sheet of your own render - no two adjacent frames may be identical"
+      ],
+      "artifacts": ["exports/<name>_16x9_vN.mp4", "job_state.json", "proof frames"],
+      "paid_generation": false
+    }
+  ],
+  "tools": [
+    "tools/video_recipes.py",
+    "tools/ffmpeg_qc.py",
+    "tools/elevenlabs_voice.py",
+    "tools/music_provider.py",
+    "tools/broll_layout_qc.py"
+  ],
+  "providers": {
+    "composition": "remotion",
+    "voice": "elevenlabs (expressive model with audio tags for story; standard model for announcer)",
+    "music": "elevenlabs_music (or any text-to-music)",
+    "sfx": "elevenlabs_sound_generation (min duration 0.5s)",
+    "transcription": "groq whisper-large-v3 (word timestamps)",
+    "finishing": "ffmpeg"
+  },
+  "routing_keywords": [
+    "launch video", "product launch", "explainer", "motion design", "motion graphics video",
+    "boutique studio style", "agency quality", "kinetic typography", "living canvas",
+    "saas explainer", "homepage video", "fast paced animated video", "camera choreography",
+    "story cold open", "animated ui mockups"
+  ],
+  "routing_negative_keywords": ["ugc", "talking head", "screen recording demo", "vertical reel", "avatar"],
+  "script_shape": [
+    "Story cold-open (10-15s): first-person mundane action -> excitement -> deflation -> visual punchline read in silence",
+    "Dark turn (2-3s): THE hard cut; one brutal thesis line in kinetic type",
+    "Reveal (4-6s): logo squash-stretch drop, name types on, badge pendulum, accent underline draw",
+    "Features (3-4 chapters x 3-5s): one persistent card per chapter + camera journey + one unique causal mechanic",
+    "Payoff (4-6s): the consequence moment + one cheeky microcopy aside",
+    "Proof (3-4s): claims mounted on the evidence + one full-canvas word slam",
+    "CTA (5-7s): sequential end-card pops, strike-through joke, cursor click with particle ring, URL type-on, friction-killer microcopy"
+  ],
+  "visual_jobs": ["proof", "mechanism", "consequence", "action", "transition"],
+  "qc_checks": [
+    "0-3 hard cuts, each on a narrative pivot; none in the first 10s",
+    "no settled composition holds >3.5s; creep zoom on every hold; no frame fully static",
+    "every camera reframe lands on its VO word within +/-4 frames (or leads by 6-18)",
+    "every landing is staggered and settles with a micro-bounce; fast moves carry 1-3 frames of blur",
+    "one causal mechanic per beat, none repeated; reflow displaces - cards never overlap without yielding",
+    "cursor click targets computed from layout, verified in probe frames",
+    "story punchline reads in near-silence; music bands land on their exact frames",
+    "one accent phrase per headline; data badges are Sharp Tags, never glowing pills",
+    "fire/particle FX never cover the text they highlight",
+    "-16 LUFS, TP <= -1.5, music 10-11 dB under VO, VO handoff step <= 8 dB"
+  ],
+  "deliverables": [
+    "1920x1080 master MP4 (h264/aac/yuv420p, loudnorm broadcast-safe)",
+    "Remotion composition source + motion helper library (reusable)",
+    "vo_words.json (beat map), sfx_filter.txt (regenerable SFX bus)",
+    "style_bible.md when a fresh reference study was run",
+    "job_state.json with per-version changes and metrics"
+  ],
+  "compliance_notes": [
+    "Never name or imitate a specific studio's brand; the style is defined by the numeric grammar in LIVING_CANVAS_PLAYBOOK.md, not by copying any one company's assets",
+    "Third-party logos (search/AI engines, CMS platforms) may appear as real marks in app-icon tiles for factual integration claims; flag trademark review before paid ad placements",
+    "All UI shown is redrawn/stylized mockup content - never real customer data or fabricated competitor claims"
+  ]
+}
