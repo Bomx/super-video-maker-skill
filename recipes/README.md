@@ -21,13 +21,14 @@ python3 .agents/skills/super-video-maker/tools/video_recipes.py test
 |---|---|
 | `avatar-explainer` | News/tutorial masters with HeyGen, source deck, spoken CTA |
 | `avatar-hook-broll` | 9:16 trend-hook shorts: Seedance avatar hook + fast beat-locked b-roll + comment-gated CTA (DFY `hook_v3` candidate) |
+| `avatar-insta-split` | 9:16 split-screen reel: screen-recording b-roll on top + avatar talking head on bottom, seam captions, hook badge, typing SFX + click-on-cut (`workflows/avatar-insta-split/`) |
+| `avatar-vo-broll` | 9:16 fullscreen reel: talking-head avatar hook + voiceover over fullscreen screen-capture b-roll (one clip per beat) + optional avatar close, lower-third captions, badge swap, SFX (`workflows/avatar-vo-broll/`) |
 | `misotts-article-sprint` | ~30s 9:16 article-promo short: 5s Seedance avatar hook (MisoTTS-cloned voice) + whip-scroll article runthrough with proof receipt cards; ~$0.6-1.1/video (DFY scale candidate) |
 | `ugc-ai-ad` | Paid-social fictional creator ads with hook variants |
 | `screencast-demo` | Polished SaaS screen recordings with click zooms |
 | `faceless-broll-ad` | Hook-driven ads without a presenter |
 | `longform-repurpose` | Podcast/webinar → vertical shorts |
-| `motion-graphics` | Remotion or HyperFrames launch/explainer motion |
-| `motion-collage-explainer` | Faceless one-idea explainer short: bold screen-print cutout collage still (gpt-image-2) animated with Seedance, calm "In a Nutshell" docu voiceover. See `MOTION_COLLAGE_STYLE.md` |
+| `living-canvas-explainer` | All motion design work (launches, explainers, kinetic pieces); scales 10-90s |
 | `captioned-talking-head` | Captions + b-roll on existing footage |
 | `avatar-product-walkthrough` | HeyGen presenter over product demo |
 | `agent-browser-proof` | Short source-investigation proof clips |

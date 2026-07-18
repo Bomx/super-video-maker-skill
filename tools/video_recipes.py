@@ -203,7 +203,8 @@ def score_recipe(recipe: dict, goal: str) -> tuple[int, list[str]]:
             score += 4
             reasons.append("+ news/explainer signal -> avatar-explainer")
 
-    if any(has(t) for t in ("demo", "walkthrough", "screencast", "saas")):
+    # NOTE: "saas" is an industry, not a format — it must not imply a demo.
+    if any(has(t) for t in ("demo", "walkthrough", "screencast", "screen recording")):
         if recipe["id"] in {"screencast-demo", "avatar-product-walkthrough"}:
             score += 3
             reasons.append("+ demo signal")
@@ -213,13 +214,25 @@ def score_recipe(recipe: dict, goal: str) -> tuple[int, list[str]]:
             score += 5
             reasons.append("+ repurpose signal")
 
-    if any(has(t) for t in ("remotion", "motion graphics", "kinetic")):
-        if recipe["id"] == "motion-graphics":
+    # All motion-design / programmatic-animation work routes to the single
+    # living-canvas grammar (it scales down to short kinetic pieces).
+    if any(
+        has(t)
+        for t in (
+            "remotion",
+            "motion graphics",
+            "motion design",
+            "kinetic",
+            "hyperframes",
+            "animated",
+            "animation",
+        )
+    ):
+        if recipe["id"] == "living-canvas-explainer":
             score += 5
-            reasons.append("+ motion graphics signal")
+            reasons.append("+ motion design signal")
 
-    # Quality/pace/craft signals upgrade a generic motion-graphics job to the
-    # fully-specified living-canvas grammar (and demote the generic recipe).
+    # Craft/pace words reinforce it further.
     if any(
         has(t)
         for t in (
@@ -237,11 +250,8 @@ def score_recipe(recipe: dict, goal: str) -> tuple[int, list[str]]:
         )
     ):
         if recipe["id"] == "living-canvas-explainer":
-            score += 6
-            reasons.append("+ craft/pace signal -> living-canvas-explainer")
-        elif recipe["id"] == "motion-graphics":
-            score -= 3
-            reasons.append("- craft signal: prefer living-canvas-explainer")
+            score += 4
+            reasons.append("+ craft/pace signal")
 
     if any(token in text for token in ("proof", "browser", "verify", "source receipt")):
         if recipe["id"] == "agent-browser-proof":

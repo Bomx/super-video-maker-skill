@@ -16,7 +16,7 @@ over ad-hoc mode names.
 | `screencast-demo` | Polished SaaS demos with click zooms and laptop frame | screen recorder, demo composer, FFmpeg |
 | `faceless-broll-ad` | Hook-driven ads without a presenter | Seedance/OpenAI Ken Burns, captions, FFmpeg |
 | `longform-repurpose` | Podcast/webinar → vertical shorts | video captioner, FFmpeg |
-| `motion-graphics` | Launch/explainer motion design | Remotion or HyperFrames, FFmpeg |
+| `living-canvas-explainer` | All motion design: launches, explainers, kinetic pieces | Remotion, FFmpeg |
 | `captioned-talking-head` | Captions + b-roll on existing footage | Remotion, Whisper, FFmpeg |
 | `avatar-product-walkthrough` | HeyGen presenter over product demo | HeyGen, screen recorder, demo composer, FFmpeg |
 | `agent-browser-proof` | Short source-investigation proof clips | agent browser recorder, FFmpeg |

@@ -7,17 +7,24 @@
     "SaaS product launch videos and homepage explainers that must feel like a top boutique motion studio made them",
     "positioning-driven launches where a story cold-open + humor earns the pitch (character VO -> punchline -> thesis slam)",
     "feature walkthroughs told as camera journeys across persistent UI mockups (punch-ins synced to VO words)",
+    "kinetic typography pieces and animated UI mockup sequences of any length",
+    "short product teasers, feature announcements, and deterministic ad-variant renders",
     "16:9 masters for landing pages, YouTube, Product Hunt, with ad cutdowns derived later"
   ],
   "not_for": [
     "paid-social UGC conversion ads (use ugc-ai-ad)",
     "talking-head content (use avatar-explainer or captioned-talking-head)",
-    "real-screen product demos (use screencast-demo)",
-    "quick single-scene motion graphics (use motion-graphics)"
+    "real-screen product demos (use screencast-demo)"
   ],
   "platforms": ["youtube", "landing_page", "product_hunt", "linkedin", "x_twitter"],
-  "aspect_ratios": ["16:9"],
-  "duration_seconds": {"min": 45, "max": 75, "target": 58},
+  "aspect_ratios": ["16:9", "9:16", "1:1"],
+  "duration_seconds": {"min": 10, "max": 90, "target": 58},
+  "scaling": {
+    "note": "This is the single motion-design recipe; it scales down. The motion GRAMMAR (springs + settle micro-bounce, camera choreography, causal physics, blur discipline, no-static-frame rule, Sharp Tag badges) is mandatory at every length. The narrative SCAFFOLDING is optional.",
+    "under_20s": "Drop the story cold-open, the three-band music handoff, and the multi-chapter structure. Keep: one persistent element + one camera journey + 1-3 causal mechanics + a single music bed + a handful of SFX hits. Beat-lock to VO or to the music if there is no VO.",
+    "20_to_40s": "Story open optional; 2-3 feature beats; two music bands (bed -> score) or one continuous bed; full SFX bus.",
+    "over_40s": "Full structure: story cold-open, thesis cut, reveal, 3-4 feature chapters, payoff, proof, CTA end card, three-band music, 30-60 event SFX bus."
+  },
   "stages": [
     {
       "id": "reference_study",
@@ -110,7 +117,7 @@
     "saas explainer", "homepage video", "fast paced animated video", "camera choreography",
     "story cold open", "animated ui mockups", "animated explainer", "hero video"
   ],
-  "routing_negative_keywords": ["ugc", "talking head", "screen recording demo", "vertical reel", "avatar"],
+  "routing_negative_keywords": ["ugc", "talking head", "screen recording demo", "avatar"],
   "script_shape": [
     "Story cold-open (10-15s): first-person mundane action -> excitement -> deflation -> visual punchline read in silence",
     "Dark turn (2-3s): THE hard cut; one brutal thesis line in kinetic type",
