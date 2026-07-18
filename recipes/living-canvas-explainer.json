@@ -105,10 +105,10 @@
     "finishing": "ffmpeg"
   },
   "routing_keywords": [
-    "launch video", "product launch", "explainer", "motion design", "motion graphics video",
-    "boutique studio style", "agency quality", "kinetic typography", "living canvas",
+    "launch video", "product launch", "explainer", "motion design", "motion graphics",
+    "boutique studio style", "agency quality", "kinetic typography", "kinetic", "living canvas",
     "saas explainer", "homepage video", "fast paced animated video", "camera choreography",
-    "story cold open", "animated ui mockups"
+    "story cold open", "animated ui mockups", "animated explainer", "hero video"
   ],
   "routing_negative_keywords": ["ugc", "talking head", "screen recording demo", "vertical reel", "avatar"],
   "script_shape": [

@@ -203,11 +203,6 @@ def score_recipe(recipe: dict, goal: str) -> tuple[int, list[str]]:
             score += 4
             reasons.append("+ news/explainer signal -> avatar-explainer")
 
-    if any(has(t) for t in ("collage", "cutout", "kurzgesagt", "in a nutshell", "halftone", "risograph")):
-        if recipe["id"] == "motion-collage-explainer":
-            score += 5
-            reasons.append("+ collage explainer signal -> motion-collage-explainer")
-
     if any(has(t) for t in ("demo", "walkthrough", "screencast", "saas")):
         if recipe["id"] in {"screencast-demo", "avatar-product-walkthrough"}:
             score += 3
@@ -222,6 +217,31 @@ def score_recipe(recipe: dict, goal: str) -> tuple[int, list[str]]:
         if recipe["id"] == "motion-graphics":
             score += 5
             reasons.append("+ motion graphics signal")
+
+    # Quality/pace/craft signals upgrade a generic motion-graphics job to the
+    # fully-specified living-canvas grammar (and demote the generic recipe).
+    if any(
+        has(t)
+        for t in (
+            "agency",
+            "studio",
+            "boutique",
+            "premium",
+            "high end",
+            "cinematic",
+            "fast paced",
+            "fast-paced",
+            "dynamic",
+            "storytelling",
+            "polished",
+        )
+    ):
+        if recipe["id"] == "living-canvas-explainer":
+            score += 6
+            reasons.append("+ craft/pace signal -> living-canvas-explainer")
+        elif recipe["id"] == "motion-graphics":
+            score -= 3
+            reasons.append("- craft signal: prefer living-canvas-explainer")
 
     if any(token in text for token in ("proof", "browser", "verify", "source receipt")):
         if recipe["id"] == "agent-browser-proof":
@@ -403,7 +423,8 @@ def cmd_test(_args: argparse.Namespace) -> None:
         ("repurpose my podcast into shorts", "longform-repurpose"),
         ("SaaS product demo walkthrough", "screencast-demo"),
         ("browser proof of the announcement", "agent-browser-proof"),
-        ("kurzgesagt style cutout collage explainer about bikeshedding", "motion-collage-explainer"),
+        ("avatar reel split screen, screen recording on top talking head on bottom", "avatar-insta-split"),
+        ("voiceover over b-roll reel, talking head hook then fullscreen screen capture", "avatar-vo-broll"),
     ]
     for goal, expected in match_cases:
         scored = [
