@@ -14,6 +14,17 @@ Use with the `living-canvas-explainer` recipe. Implementation target: Remotion
 (single flat actor timeline). Audio: beat-locked VO + three-band music + a
 30-60 event SFX bus, mixed in FFmpeg.
 
+> **START HERE, in this order:**
+> 1. **§16 One-Pass Build Order** — the sequence that prevents rework. The
+>    original build took ten versions; nearly all of it was ordering mistakes.
+>    Read this before writing any code.
+> 2. `workflows/living-canvas-explainer/section-template.tsx` — a fully
+>    assembled beat with every number explained. Copy the structure.
+> 3. `workflows/living-canvas-explainer/motion-library.tsx` — the helper and
+>    component library. Never rebuild springs, camera rigs, or FX from scratch.
+>
+> Sections 1-15 below are the reference grammar; consult them as you build.
+
 ---
 
 ## 1. The Ten Laws
@@ -582,3 +593,81 @@ placement with windowed `volumedetect` at 3-4 event times vs a silent window.
 - Fully-rounded glowing badge pills → instantly reads as AI-template output.
 - 21s of stage-setting before the pitch → compress to ≤15s; cut the hope beat.
 - zsh word-splitting in `for pair in "a b"` loops silently merging outputs — use `printf | while read`.
+
+---
+
+## 16. One-Pass Build Order (how to skip the ten iterations)
+
+This playbook was distilled from a build that took **ten versions**. Almost none
+of that was wasted creative exploration — it was **rework caused by doing things
+in the wrong order**. Follow this sequence and most of it disappears.
+
+### The rework triggers we actually hit
+
+| Round | What changed | What it forced | Prevention |
+|---|---|---|---|
+| v2 | Client picked a different voice | **Re-locked every frame number in the timeline** | Audition voices BEFORE building anything |
+| v4 | Badge restyle (pill → sharp tag) | Edits at 4 separate code sites | Lock design tokens before building sections |
+| v3, v7 | "Not dynamic enough" (twice) | Re-choreographed every section | Build ONE section to the ship bar, approve, then replicate |
+| v8 | Story cold-open added late | Timeline splice + re-lock of section gates | Decide story/no-story before producing VO |
+| v9 | Cold open ran 21s, felt slow | VO re-cut + all story beats retimed | Budget the cold open ≤15s from the start |
+| v10 | Music swap + tilts | Cheap — audio is decoupled by design | (This is why audio finishing goes last) |
+
+### The order
+
+**Phase 1 — Lock the immutables (before a single line of composition code).**
+1. Script, including whether there is a story cold-open. Budget it: **≤15s**.
+2. **Audition the voice.** Generate 2-3 candidate reads of the same line and get
+   a decision. A voice change after the build re-locks every frame number.
+3. Design tokens: accent hex, font files, badge style (Sharp Tag vs statement
+   pill), card radius/shadow, light/dark world colors. Put them in one `C`
+   object. A restyle later touches every section.
+4. Duration target and the section map (which beat covers which VO line).
+
+**Phase 2 — Produce the audio spine.**
+5. Generate VO (story read with emotion tags, announcer read separately).
+6. Silence surgery on tagged reads (§4.2) — expect 40-60% dead air.
+7. Whisper for word timestamps → build the `T` object. **Every frame number in
+   the video derives from this file.** Never hand-tune a beat number.
+
+**Phase 3 — Prove the pattern on ONE section.**
+8. Build a single feature beat to the **full ship bar**: camera journey, reflow,
+   FX, causal mechanic, exit whip. Use `section-template.tsx` as the skeleton.
+9. **Get sign-off on that one section before replicating.** This is the single
+   highest-leverage checkpoint in the whole process — "more dynamism" feedback
+   after five sections exist costs five times as much as after one.
+
+**Phase 4 — Replicate and differentiate.**
+10. Build remaining sections from the approved pattern. Assign each one a
+    *different* causal mechanic (§11) — track them in a list so none repeats.
+11. Add transformation chains (§10) **last** among visuals; they depend on both
+    adjacent sections existing. Max 1-2, spaced 20s+.
+
+**Phase 5 — Audio finishing (deliberately decoupled).**
+12. Music bands, SFX bus, mix, loudnorm. Cheap to iterate because the video
+    track is untouched (`-c:v copy`). Swap tracks freely at this stage.
+
+### Probe-frame QC formula (replaces "render some frames and look")
+
+For every beat starting at frame `B`, probe exactly these and state what you are
+checking:
+
+| Probe | Checking |
+|---|---|
+| `B + 3` | entrance readable? landing not simultaneous with neighbours? |
+| `B + (cascade mid)` | rows/chips mid-flight: is displacement blur visible but not smeared? |
+| `B + punch + 2` | is the punch centered on the SUB-REGION, not the card center? |
+| `B + punch + 8` | settled and crisp? (blur must be gone) |
+| `B + FX peak` | does the FX cover text it should highlight? (the fire mistake) |
+| `B + exit - 2` | is the next beat already entering? (no empty canvas) |
+| any cursor click | does the arrow tip actually touch the button? compute, don't eyeball |
+
+Render probes with `npx remotion still src/index.ts <Comp> out/p.png --frame=N
+--timeout=120000`. **Read every image.** Frames are cheap; a full render is not.
+
+### Expected effort at each scale
+
+- **<20s piece:** ~1 section, 6-10 probes, 1 render. Under an hour.
+- **60s launch:** 6-8 sections, 25-40 probes, 3-5 full renders (~4 min each at
+  `--concurrency=4`), 2-3 audio mixes. One focused session if you follow the
+  order above; ten sessions if you don't.

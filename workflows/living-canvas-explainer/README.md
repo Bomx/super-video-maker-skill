@@ -7,6 +7,11 @@ This directory holds the reusable implementation assets.
 
 ## Files
 
+- `section-template.tsx` — **start here.** One fully-assembled feature beat and
+  one story beat, with every frame offset, zoom factor, and spring constant
+  explained inline. The motion library gives you the parts; this shows the
+  assembly, which is where iterations get burned. Beat offsets are relative to
+  a single `B` constant so you can paste a beat anywhere.
 - `motion-library.tsx` — the complete, production-tested helper + component
   library (springs, actor system, camRig with creep + velocity-blur dead zone,
   rank-sort slot system, settle micro-bounce, WordPop kinetic type with
