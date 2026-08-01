@@ -35,6 +35,10 @@ existing long-form video into polished video assets. The skill can produce:
 
 ## Read these files when needed
 
+- `VIDEO_COPY_PLAYBOOK.md` for the copy layer of EVERY recipe: the four-line spine (one viewer, one promise, one mechanism, one next step), the two-track rule (voice carries the argument, screen carries the evidence, neither repeats the other), on-screen copy craft (kinetic headlines, data badges, ghost titles, end-card offers, the typographic strike), format-by-format arcs, credibility rules, and the copy gate to run before the first paid generation call. Read it BEFORE writing any script, hook, headline, or CTA.
+- `SPOKEN_VO_HUMANIZER.md` for how a spoken line should SOUND (12 rules for short-form scripts + the banned spoken-AI tells list).
+- `HOOK_PLAYBOOK_ARTICLE_SPRINT.md` for hook families, the angle-before-copy rule, and loop accounting.
+- `TABLETOP_EXPLAINER_PLAYBOOK.md` + `workflows/tabletop-levels-explainer/` for building tiered "levels-of-X" explainer reels (fictional presenter + first/last-frame craft b-roll + beat-locked switch-assembly).
 - `recipes/README.md` and `tools/video_recipes.py` for machine-readable video recipes (list, match, plan, validate).
 - `REFERENCE.md` for provider capabilities and routing decisions.
 - `FFMPEG_PLAYBOOK.md` for exact FFmpeg recipes.
@@ -48,6 +52,7 @@ existing long-form video into polished video assets. The skill can produce:
 ## Operating rules
 
 1. **Run a staged pipeline, not random tool calls.** Use: intake -> script/shot list -> assets -> assembly -> FFmpeg finishing -> QC -> exports.
+1a. **Copy is a production gate, not a garnish.** Before the first TTS call, clip generation, or timeline build, write the four-line spine from `VIDEO_COPY_PLAYBOOK.md` (one viewer, one promise, one mechanism, one next step), pick the angle, and run its copy checklist. Voice and screen must never carry the same sentence: mute the video and the story should still track, blank the screen and the argument should still land. This ordering is not stylistic. In VO-locked formats the script IS the timeline, so a script change after the build re-locks every frame number.
 2. **Confirm paid generation before the first paid call.** Show planned providers, number of clips/images, duration, resolution, and likely cost drivers.
 3. **Prefer skill-local tools.** Use files in `tools/` before reaching for project-root scripts.
 4. **Every tool should emit `RESULT: {...}`.** Parse that JSON as the source of truth.

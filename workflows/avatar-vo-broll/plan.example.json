@@ -1,0 +1,40 @@
+{
+  "_comment": "Plan for build_vo_broll.py. Paths resolve relative to THIS file unless absolute. Fullscreen format: type 'avatar' beats show the talking head (blurred-filled to 9:16), type 'broll' beats show a library clip fullscreen; the avatar audio is one continuous voiceover under everything. Land beat boundaries on phrase breaks from the transcript; the beats must cover the whole avatar duration.",
+  "canvas": { "w": 1080, "h": 1920, "fps": 30 },
+  "avatar_clip": "avatar.mp4",
+  "avatar_content_band": "auto",
+  "transcript": null,
+  "badges": [
+    { "png": "badge_topic.png", "from": 0.0, "to": 4.0, "xy": [80, 150], "w": 760 },
+    { "png": "badge_cta.png",   "from": 4.0, "to": 34.0, "xy": [80, 150], "w": 520 }
+  ],
+  "caption": {
+    "enabled": true,
+    "font": "Arial-Bold",
+    "pt": 54,
+    "cy": 1410,
+    "padx": 34, "pady": 18, "radius": 30,
+    "cta_word": "comment",
+    "cta_text": "Comment \"SKILL\"",
+    "cta_anchor": null,
+    "cta_tail_s": 2.5,
+    "fixups": { "\\bCloud\\b": "Claude" }
+  },
+  "sfx": {
+    "enabled": true,
+    "typing": "../avatar-insta-split/assets/typing.wav",
+    "click": "../avatar-insta-split/assets/click.wav",
+    "typing_vol": 0.13,
+    "click_vol": 0.38
+  },
+  "work_dir": "_work",
+  "output": "reel_final.mp4",
+  "beats": [
+    { "t0": 0.0,  "t1": 4.0,  "type": "avatar" },
+    { "t0": 4.0,  "t1": 9.0,  "type": "broll", "clip": "../../broll-library/clips/homepage.mp4" },
+    { "t0": 9.0,  "t1": 14.0, "type": "broll", "clip": "../../broll-library/clips/claude_code_cli.mp4" },
+    { "t0": 14.0, "t1": 20.0, "type": "broll", "clip": "../../broll-library/clips/backlinks_exchange.mp4" },
+    { "t0": 20.0, "t1": 28.0, "type": "broll", "clip": "../../broll-library/clips/content_calendar.mp4" },
+    { "t0": 28.0, "t1": 36.0, "type": "broll", "clip": "../../broll-library/clips/optimizations_gsc.mp4" }
+  ]
+}

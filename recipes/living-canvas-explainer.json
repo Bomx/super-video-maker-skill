@@ -43,6 +43,7 @@
       "id": "script_story_vo",
       "title": "Script, story cold-open, and beat-locked VO",
       "actions": [
+        "COPY GATE FIRST (VIDEO_COPY_PLAYBOOK.md): write the four-line spine (one viewer, one promise, one mechanism, one next step), pick the angle, and split the two tracks so the voice carries the argument and the screen carries the evidence. Never let a kinetic headline and the VO say the same sentence. One accent phrase per headline; end-card pills are concrete deliverables, not adjectives",
         "Write the arc: story cold-open (10-15s, first person, emotional, visual punchline) -> dark-turn thesis line (THE hard cut) -> product reveal -> 3-4 feature chapters as clipped 2-second clauses -> payoff beat with one cheeky microcopy aside -> proof -> CTA with a typographic joke (strike-through)",
         "Announcer VO: energetic TTS read of the pitch half; story VO: expressive TTS with emotion tags ([tired][excited][sighs]...) at stability ~0.35 style ~0.6",
         "MANDATORY silence surgery on tagged reads (they render 40-60% dead air): silenceremove stop_duration=0.26 threshold=-38dB + atempo 1.08, then Whisper and CUT A WHOLE BEAT if the story still exceeds 15s (dropping the 'hope' beat so payoff follows action is usually funnier)",

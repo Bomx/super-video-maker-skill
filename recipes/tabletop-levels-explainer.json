@@ -1,0 +1,140 @@
+{
+  "id": "tabletop-levels-explainer",
+  "name": "Tabletop 'Levels-of-X' Explainer Reel",
+  "version": "1.1.0",
+  "description": "Create from scratch a 9:16 educational reel that builds a tiered concept (N levels/stages of X) one physical layer at a time. A calm talking-head presenter alternates with overhead handcrafted-tabletop b-roll (a drawn pyramid + colored tier stickies, paper cut-out icons, physical models, a radial card wheel), real screenshot receipts, and a flat animated flow diagram, under a soft orchestral bed and minimalist word-locked captions. Generative pipeline: a fictional presenter via Seedance reference-to-video with native audio (voice locked across clips), craft b-roll via Seedance first-frame+last-frame steering, and a beat-locked switch-assembly. Pick this when you want a calm, authoritative, tactile explainer that earns trust by physically constructing the idea.",
+  "best_for": [
+    "'N levels/stages of X' ladder or hierarchy explainers built tier-by-tier on a physical pyramid",
+    "calm authority talking-head + tactile handcraft b-roll (no hype, no fast UGC energy)",
+    "concept education where each beat reveals one new physical layer, prop, or proof",
+    "topics that benefit from real screenshot proof receipts mid-video"
+  ],
+  "not_for": [
+    "paid-social conversion ads (use ugc-ai-ad)",
+    "product/SaaS demos (use screencast-demo or avatar-product-walkthrough)",
+    "fast meme/hook shorts (use avatar-hook-broll)"
+  ],
+  "platforms": ["instagram_reels", "youtube_shorts", "tiktok"],
+  "aspect_ratios": ["9:16"],
+  "duration_seconds": {"min": 45, "max": 100, "target": 85},
+  "stages": [
+    {
+      "id": "script_storyboard",
+      "title": "Write the ladder script + beat storyboard",
+      "actions": [
+        "From the topic, write the VO script as a ladder: hook ('There are N levels/stages of X, most people only know level one') -> reveal tier 1..N lowest-to-highest, each tier = one beat -> proof receipts -> stakes/consequence -> a provocative closing either/or question",
+        "Keep delivery calm and measured (NOT UGC energy); ~2-3.4 words/sec; target the duration band",
+        "Author storyboard.json: one row per beat with {t0,t1, layout: avatar_fullscreen|broll, job: proof|mechanism|consequence|action|transition, vo, caption, prop/visual}. Alternate talking-head beats with craft beats; land every cut on a sentence break",
+        "Decide the physical metaphor set up front: the building pyramid (one sticky per tier), plus 4-6 supporting craft props (paper icon cutouts, radial card wheel, plate of symbolic objects, physical DNA/molecule models, paper city/sun, a closing texture)"
+      ],
+      "artifacts": ["storyboard.json", "script.json"],
+      "paid_generation": false
+    },
+    {
+      "id": "presenter",
+      "title": "Fictional presenter (Seedance reference-to-video, native audio)",
+      "actions": [
+        "Build a DISTINCT fictional creator: start from a licensed/royalty-free photo in the target staging (warm cozy room, podcast condenser mic foreground, light crew-neck) for photographic realism, then transform identity with gpt-image-2 (image_provider.py / openai_image_tool.py) into a NEW person -> character_hero.png (1024x1536). Never clone a real identifiable person.",
+        "Split the script into sentence-aligned chunks of <=~12s of speech (so each fits one Seedance clip, max 15s)",
+        "Per chunk: fal_seedance_video.py --mode reference --reference-image hero --generate-audio, dialogue in the prompt, calm delivery. KEEP native audio.",
+        "Lock the voice: extract a clean WAV from the FIRST approved chunk and pass it as --reference-audio to every later chunk (rules 44a/44b). Reuse one --seed.",
+        "Whisper EACH clip (word timestamps) and concatenate -> the continuous VO bed + a global word-time map that every cut and caption locks to"
+      ],
+      "artifacts": ["assets/character/character_hero.png", "assets/presenter/*.mp4", "analysis/presenter_timing.json"],
+      "paid_generation": true
+    },
+    {
+      "id": "craft_broll",
+      "title": "Handcraft b-roll (first+last-frame steering) + receipts + diagram",
+      "actions": [
+        "Tier reveals + props: make gpt-image-2 FIRST and LAST frame pairs, then fal_seedance_video.py --mode image --reference-image FIRST --reference-image LAST (two images => image_url first + end_image_url last). The motion prompt describes the in-between action ('a hand draws the pyramid and places the yellow sticky'); Seedance fills realistic hand-craft motion.",
+        "Keep the building pyramid consistent by CHAIN-EDITING one base image: blank -> +tier1 sticky -> +tier2 -> +tier3 -> +apex, each step a gpt-image-2 edit of the previous frame",
+        "Proof receipts: REAL screenshots of the actual sources (headless Chrome / Playwright channel=chrome) -> Ken Burns push-in to the exact phrase",
+        "Flow diagram: a flat 2D animated graphic (HTML+paused CSS keyframes scrub-captured frame-accurate via Playwright, or Remotion/HyperFrames). No AI-slop glow.",
+        "Prefer REAL over generated for any proof/receipt; generated craft is a faithful approximation, not a substitute for a real screenshot"
+      ],
+      "artifacts": ["assets/broll/*.mp4", "assets/craft/*_first.png", "assets/craft/*_last.png", "assets/receipts/*.png", "assets/diagram/*.mp4"],
+      "paid_generation": true
+    },
+    {
+      "id": "assemble",
+      "title": "Beat-locked switch-assembly + captions + orchestral bed",
+      "actions": [
+        "Audio: concatenate the presenter chunk clips -> one continuous VO bed (their native audio)",
+        "Video: a SWITCHED timeline -> show the presenter during talking-head beats, cut to b-roll during craft beats, every boundary on the storyboard window derived from the global word times (presenter audio keeps playing under b-roll)",
+        "Captions: minimalist word-locked reveal -> small clean white sans, sentence case, 2-3 word groups, lower-third centered, subtle shadow; color a keyword for the punch lines",
+        "Music: soft orchestral underscore (strings + piano, slow swell, slightly ominous toward the closing question). Generate via ElevenLabs Music / Suno / Replicate; if those are out of credit, drop in a royalty-free/CC track. Duck under the VO with sidechaincompress; loudnorm I=-16:TP=-1.5:LRA=11"
+      ],
+      "artifacts": ["assets/captions.ass", "exports/master.mp4"],
+      "paid_generation": true
+    },
+    {
+      "id": "qc",
+      "title": "QC and delivery",
+      "actions": [
+        "ffmpeg_qc: 720x1280 (or 1080x1920) h264/aac yuv420p, no black frames, duration within band",
+        "Frame-sheet review: every tier reveal lands on its spoken word; talking-head and craft beats alternate; captions legible over warm craft b-roll; VO clear over the ducked bed",
+        "Copy the final MP4 to ~/Desktop (the skill tmp dir is hidden from Finder)"
+      ],
+      "artifacts": ["final master mp4 on Desktop", "job_state.json"]
+    }
+  ],
+  "tools": [
+    "tools/image_provider.py",
+    "tools/fal_seedance_video.py",
+    "tools/video_captioner.py",
+    "tools/music_provider.py",
+    "tools/broll_layout_qc.py",
+    "tools/ffmpeg_qc.py"
+  ],
+  "providers": {
+    "presenter": "fal.ai bytedance/seedance-2.0/reference-to-video (fictional character, --generate-audio)",
+    "craft_broll": "fal.ai bytedance/seedance-2.0/image-to-video (first-frame image_url + last-frame end_image_url)",
+    "character_image": "openai gpt-image-2 (quality=high) from a royalty-free staging photo",
+    "receipts": "real source screenshots via Playwright (channel=chrome) + FFmpeg Ken Burns",
+    "diagram": "HTML paused-CSS scrub-capture via Playwright, or Remotion / HyperFrames",
+    "voice": "Seedance-native audio (voice locked via --reference-audio); ElevenLabs eleven_v3 when credited",
+    "music": "ElevenLabs Music / Suno / Replicate; royalty-free/CC fallback when out of credit",
+    "transcription": "whisper (local base.en) or groq whisper-large-v3 for word timing"
+  },
+  "routing_keywords": [
+    "levels of x",
+    "levels of ai",
+    "stages explainer",
+    "pyramid explainer",
+    "tabletop craft b-roll",
+    "ladder hierarchy reel",
+    "tier by tier explainer",
+    "handcrafted b-roll",
+    "calm talking head explainer"
+  ],
+  "routing_negative_keywords": ["paid ad", "ugc", "product demo", "screencast", "fast hook short"],
+  "script_shape": [
+    "Hook (<=4s, avatar fullscreen): 'There are N stages/levels to X, and most people only know level one.'",
+    "Tier 1..N (alternate avatar + craft reveal): reveal one physical layer per beat, lowest -> highest",
+    "Proof receipts: real screenshots that the frontier is contested / real",
+    "Stakes/consequence: what the top tier unlocks (concrete examples montage)",
+    "Closing question (b-roll): leave the viewer on a provocative either/or"
+  ],
+  "visual_jobs": ["proof", "mechanism", "consequence", "action", "transition"],
+  "qc_checks": [
+    "every tier reveal lands on its spoken word (word-locked)",
+    "talking-head beats and craft beats alternate per the storyboard",
+    "no generated craft still held >3.5s; receipt push-ins hit the named phrase",
+    "captions minimalist + legible over warm craft b-roll",
+    "orchestral bed ducked under VO, broadcast-safe loudness",
+    "presenter is a distinct fictional creator (no real-person likeness)"
+  ],
+  "deliverables": [
+    "720x1280 (or 1080x1920) master MP4 (loudnorm broadcast-safe)",
+    "storyboard.json (beat map, reusable across episodes)",
+    "character_hero.png (reusable presenter across episodes)",
+    "presenter_timing.json (global word times) + captions.ass",
+    "job_state.json with learnings"
+  ],
+  "compliance_notes": [
+    "The presenter must be a DISTINCT fictional creator: a royalty-free/licensed photo may seed photographic realism, but transform identity so no real person is recreated and never imply a real person's endorsement",
+    "Prefer REAL screenshots for proof receipts; generated craft b-roll is an approximation of physical craft, never a substitute for a real source",
+    "Match the platform's native resolution (e.g. 720x1280 for IG/TikTok) unless higher is explicitly needed"
+  ]
+}

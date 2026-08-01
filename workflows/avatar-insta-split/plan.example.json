@@ -1,0 +1,48 @@
+{
+  "_comment": "Plan for build_reel.py. Paths resolve relative to THIS file unless absolute.",
+  "_broll_modes": "broll_source can be (a) a TALL ARTICLE SCREENSHOT (.png) — recommended for article reels: build_reel pans it with a controllable, explicit scroll speed via per-beat scroll_from/scroll_to (pixels in the article once scaled to canvas width); a beat with scroll_from:0 frames the HEADLINE. Or (b) a screen RECORDING (.mp4) — legacy: each beat holds a static crop CW:CH:CX:CY at broll_in (aspect-preserved, no squash).",
+  "_language": "language: 'English' keeps the HeyGen text VO (unchanged). Any other value makes gen_avatar.py use a dynamically-picked ElevenLabs voice for that language; captions auto-follow (Whisper). platform: 'youtube' -> brand-callout CTA (no comment/link); 'instagram' -> comment-DM CTA.",
+  "canvas": { "w": 1080, "h": 1920, "fps": 30 },
+  "split": {
+    "broll_top_h": 1024,
+    "avatar_bottom_h": 896,
+    "avatar_content_band": "auto"
+  },
+  "language": "English",
+  "platform": "youtube",
+  "avatar_clip": "avatar.mp4",
+  "broll_source": "article.png",
+  "badge_png": "badge.png",
+  "badge_enable": [3.0, 7.5],
+  "badge_xy": [116, 150],
+  "badge_w": 848,
+  "transcript": null,
+  "caption": {
+    "enabled": true,
+    "font": "Arial-Bold",
+    "pt": 56,
+    "seam_cy": 1006,
+    "padx": 34, "pady": 18, "radius": 30,
+    "_cta": "EN/Instagram: cta_word='comment' + cta_text='Comment \"SEO\"'. Non-English or YouTube brand callout: set cta_word=null, cta_anchor='tail', cta_text='Zoek <Brand>' and the pill holds over the last cta_tail_s seconds.",
+    "cta_word": "comment",
+    "cta_text": "Comment \"SEO\"",
+    "cta_anchor": null,
+    "cta_tail_s": 2.5,
+    "fixups": {}
+  },
+  "sfx": {
+    "enabled": true,
+    "typing": "assets/typing.wav",
+    "click": "assets/click.wav",
+    "typing_vol": 0.13,
+    "click_vol": 0.38
+  },
+  "work_dir": "_work",
+  "output": "reel_final.mp4",
+  "beats": [
+    { "t0": 0.0,  "t1": 2.2,  "scroll_from": 0,    "scroll_to": 120 },
+    { "t0": 2.2,  "t1": 6.0,  "scroll_from": 120,  "scroll_to": 1500 },
+    { "t0": 6.0,  "t1": 9.5,  "scroll_from": 1500, "scroll_to": 2600 },
+    { "t0": 9.5,  "t1": 12.5, "scroll_from": 2600, "scroll_to": 3500 }
+  ]
+}
