@@ -416,13 +416,59 @@ Important lesson: HeyGen avatars and voices are separate. A selected avatar does
 not guarantee the matching voice. If the avatar API returns `default_voice_id:
 null`, query voices and choose the matching voice by name.
 
-## Seedance 2.0 via fal.ai
+## Seedance 2.5 via fal.ai
 
 Use Seedance for short generated b-roll, product-inspired visuals, drone-style
 clips, cinematic inserts, or stylized UGC footage.
 
 Default to fal.ai for Seedance. The project `.env` uses `FALAI_API_KEY`; the
 skill-local wrapper maps it to the `FAL_KEY` expected by the fal SDK.
+
+### Version routing
+
+The wrapper defaults to Seedance 2.5 and takes `--seedance-version 2.0` (or
+`SEEDANCE_VERSION=2.0` in the environment) to roll back without touching a
+recipe. What actually differs:
+
+| | 2.5 | 2.0 |
+| --- | --- | --- |
+| Endpoints | text / image / reference-to-video | same three |
+| Distilled tiers | none | `fast/` and `mini/` |
+| Resolution | 480p, 720p, 1080p, 4k | same |
+| Duration | `auto`, 4-15s | same |
+| Access | early access, gated | generally available |
+
+Two things people expect from 2.5 that fal does not currently expose: there is
+no 30-second duration (the endpoint enum still stops at 15s) and there is no
+fast or mini tier. `--fast` and `--mini` therefore pin that single call back to
+2.0 and log that they did.
+
+### Seedance 2.5 is early access, and unentitled accounts fail silently
+
+Requesting 2.5 without entitlement does not return an error. fal answers HTTP
+200 in about a second and hands back the canned example clip from the
+endpoint's own schema, at whatever duration and resolution that sample happens
+to be. Every downstream step would treat that as a successful generation and
+ship stock footage.
+
+`fal_seedance_video.py` guards against this: it detects the example asset by
+URL and, by default, retries on `--fallback-version` (2.0) and reports
+`"fell_back": true` in its RESULT payload. Pass `--no-fallback` to make it exit
+non-zero instead. Never remove that guard.
+
+Tells that a clip was not really generated:
+
+- `elapsed_s` around 1-2s rather than 60-120s.
+- `output_url` on `storage.googleapis.com/falserverless/example_outputs/`.
+- `seed` of exactly 0.
+- Returned duration and resolution ignore what was requested.
+
+To get real 2.5 output, request access while signed in to fal on the model page
+(`https://fal.ai/models/bytedance/seedance-2.5/text-to-video`) and accept its
+terms. They are B2B-only and require an `end_user_id` on every payload, which
+the wrapper always sends (`--end-user-id`, else `FAL_END_USER_ID`, else a
+stable anonymous machine id). Once access is granted the default path starts
+producing real 2.5 clips with no code change.
 
 Default:
 
@@ -453,8 +499,14 @@ Prompting guidance:
 ### Seedance consistency for UGC ads
 
 Seedance UGC ads need identity consistency more than cinematic variety. Use the
-same `visual_seed` and the same approved character references across every clip
-in one ad batch.
+same approved character references across every clip in one ad batch.
+
+Note that neither 2.5 nor 2.0 documents a `seed` input on fal. The endpoints
+return a seed but do not take one, and they ignore unknown fields rather than
+rejecting them, so `--seed` is accepted and has no observable effect. Identity
+consistency comes from the reference images, not from a locked seed. Keep
+storing `visual_seed` in `character_card.json` if it helps you track a batch,
+but do not rely on it to hold a face.
 
 Recommended command shape:
 
@@ -465,15 +517,14 @@ python3 .agents/skills/super-video-maker/tools/fal_seedance_video.py generate \
   --duration 5 \
   --resolution 720p \
   --aspect-ratio 9:16 \
-  --seed 18427 \
   --reference-image tmp/video_jobs/<job_id>/assets/character/creator_hero.png \
   --reference-image tmp/video_jobs/<job_id>/assets/character/creator_medium_phone.png
 ```
 
 Consistency rules:
 
-- Keep `--seed` fixed for all clips featuring the same creator. Store it as
-  `visual_seed` in `character_card.json`.
+- Do not count on `--seed` to hold the creator. Seedance takes no seed input;
+  the reference images are the only identity control.
 - Reuse 1-3 approved reference images. Too many weak references can increase
   drift; prefer a crisp face portrait plus one medium talking-to-camera frame.
 - Change only the beat action and environment details between clips.

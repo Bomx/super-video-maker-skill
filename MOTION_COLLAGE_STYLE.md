@@ -2,7 +2,7 @@
 
 The recipe behind the `motion-collage-explainer` format: a bold, screen-print
 **cutout collage** still (built with OpenAI `gpt-image-2`) that is then brought to
-life with **Seedance 2.0 through fal.ai** and narrated in a calm **documentary
+life with **Seedance 2.5 through fal.ai** and narrated in a calm **documentary
 "explainer" voice** in the spirit of channels like Kurzgesagt ("In a Nutshell").
 
 Read this before building any collage-style short. It defines the look, the
@@ -105,7 +105,7 @@ the set reads as one series.
 
 ---
 
-## 4. Animate the still with Seedance 2.0 (fal.ai)
+## 4. Animate the still with Seedance 2.5 (fal.ai)
 
 Bring the poster to life as a **living collage**, not a re-imagined scene. Use
 `image-to-video` so Seedance animates the exact still you approved:
@@ -121,8 +121,8 @@ python3 .agents/skills/super-video-maker/tools/fal_seedance_video.py generate \
 ```
 
 Use `--mode reference` instead when you want several clips to share the collage
-style/character across beats (pass the poster(s) as `--reference-image`, reuse the
-same `--seed`).
+style/character across beats (pass the poster(s) as `--reference-image`; the
+references are what carry the style, since Seedance takes no seed input).
 
 ### Motion prompt rules
 

@@ -19,7 +19,7 @@ The flagship format is:
 
 - **Avatar Explainers:** trending-news or tutorial videos with a HeyGen avatar, source receipts, b-roll, captions, and CTA outro.
 - **Screen-recorded demos:** product walkthroughs with cursor logs, zooms, click effects, captions, narration, and optional S3 upload.
-- **AI b-roll videos:** Seedance 2.0 clips through Replicate, with OpenAI image fallback and FFmpeg motion.
+- **AI b-roll videos:** Seedance 2.5 clips through fal.ai (Replicate 2.0 as a legacy fallback), with OpenAI image fallback and FFmpeg motion.
 - **Captioned talking-head videos:** avatar or real video plus centered karaoke captions.
 - **Faceless explainers:** motion graphics, UI cards, screenshots, typographic cards, and generated scenes.
 - **Repurposed shorts:** long videos clipped, captioned, reformatted, and exported for social platforms.
@@ -68,7 +68,7 @@ super-video-maker-skill/
 ├── .env.example                     # Environment variable template
 ├── tools/
 │   ├── heygen_client.py             # HeyGen avatar generation + polling + download
-│   ├── replicate_video.py           # Seedance 2.0 via Replicate
+│   ├── replicate_video.py           # Seedance 2.0 via Replicate (legacy fallback)
 │   ├── image_provider.py            # OpenAI image generation/editing helper
 │   ├── screen_recorder.py           # FFmpeg/Xvfb or Playwright screen recording
 │   ├── agent_browser_recorder.py    # Agent-operated browser proof recording
@@ -161,7 +161,7 @@ Provider notes:
 
 - **HeyGen** renders avatar video. `HEYGEN_AVATAR_ID` and `HEYGEN_VOICE_ID` are separate values.
 - **OpenAI** is used for image generation/editing and Whisper transcription.
-- **Replicate** runs Seedance 2.0 b-roll.
+- **fal.ai** runs Seedance 2.5 b-roll. **Replicate** is a legacy Seedance 2.0 fallback.
 - **ElevenLabs** can generate voiceover or music.
 - **AWS S3** is only needed if you use upload helpers in the demo composer.
 

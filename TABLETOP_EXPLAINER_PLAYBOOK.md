@@ -39,7 +39,7 @@ vo, caption, prop) so every cut lands on a sentence break.
    clip). Author `chunks.json`.
 4. Generate each chunk with **Seedance reference-to-video + native audio** (the chunk dialogue
    lives in the prompt). **Lock the voice:** run chunk A first, extract a clean 4s WAV from it, and
-   pass that as `--reference-audio` to every later chunk (rules 44a/44b). One `--seed`.
+   pass that as `--reference-audio` to every later chunk (rules 44a/44b).
 5. Whisper every clip; concatenate -> the continuous VO bed + a global word-time map that every
    cut and caption locks to (`whisper_timeline.py`).
 

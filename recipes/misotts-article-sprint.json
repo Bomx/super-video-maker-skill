@@ -123,7 +123,7 @@
   ],
   "providers": [
     "self-hosted MisoTTS on RunPod (VO, ~$0.57/hr pod only while running)",
-    "fal.ai bytedance/seedance-2.0/reference-to-video (5s hook, only paid generation)",
+    "fal.ai bytedance/seedance-2.5/reference-to-video (5s hook, only paid generation)",
     "groq whisper-large-v3 (word timing + QC)",
     "playwright + system chrome (article + receipt captures)",
     "PIL + FFmpeg (body render + assembly)",
@@ -188,7 +188,7 @@
     "MisoTTS is English-only; non-English projects must stay on the ElevenLabs path"
   ],
   "cost_model_usd": {
-    "_verified": "fal.ai pricing page 2026-06-12: Seedance 2.0 reference-to-video = $0.3024/s standard, $0.2419/s fast (720p, audio included)",
+    "_verified": "fal.ai pricing page 2026-06-12: Seedance 2.0 reference-to-video = $0.3024/s standard, $0.2419/s fast (720p, audio included). Seedance 2.5 pricing not yet published: the model page is early-access gated, so re-verify before quoting a 2.5 cost.",
     "seedance_hook_8s_720p_standard": "2.42 (v7 as-built; 15-word hook needs ~7s speech)",
     "seedance_hook_5s_720p_standard": "1.51 (hook <=11 words)",
     "seedance_hook_5s_720p_fast": "1.21 (cheapest acceptable; fast tier maxes at 720p which we use anyway)",

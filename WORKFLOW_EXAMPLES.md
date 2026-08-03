@@ -392,7 +392,7 @@ Pipeline:
 4. **Save `character_card.json`.** Include creator name, fictional bio,
    wardrobe, camera energy, `visual_seed`, `voice_id`/`voice_seed`, approved
    reference image paths, allowed claims, banned claims, and negative prompts.
-5. **Generate Seedance clips.** Use the same `--seed` and the same approved
+5. **Generate Seedance clips.** Use the same approved
    `--reference-image` values for every beat. Vary only the action and camera
    direction: hook talking-to-camera, product demo, UI proof insert, objection
    line, CTA close.
@@ -429,7 +429,6 @@ python3 .agents/skills/super-video-maker/tools/fal_seedance_video.py generate \
   --duration 5 \
   --resolution 720p \
   --aspect-ratio 9:16 \
-  --seed 18427 \
   --reference-image tmp/video_jobs/<job_id>/assets/character/creator_hero.png \
   --reference-image tmp/video_jobs/<job_id>/assets/character/creator_medium_phone.png
 ```

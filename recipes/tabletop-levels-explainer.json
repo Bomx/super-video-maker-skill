@@ -37,7 +37,7 @@
         "Build a DISTINCT fictional creator: start from a licensed/royalty-free photo in the target staging (warm cozy room, podcast condenser mic foreground, light crew-neck) for photographic realism, then transform identity with gpt-image-2 (image_provider.py / openai_image_tool.py) into a NEW person -> character_hero.png (1024x1536). Never clone a real identifiable person.",
         "Split the script into sentence-aligned chunks of <=~12s of speech (so each fits one Seedance clip, max 15s)",
         "Per chunk: fal_seedance_video.py --mode reference --reference-image hero --generate-audio, dialogue in the prompt, calm delivery. KEEP native audio.",
-        "Lock the voice: extract a clean WAV from the FIRST approved chunk and pass it as --reference-audio to every later chunk (rules 44a/44b). Reuse one --seed.",
+        "Lock the voice: extract a clean WAV from the FIRST approved chunk and pass it as --reference-audio to every later chunk (rules 44a/44b).",
         "Whisper EACH clip (word timestamps) and concatenate -> the continuous VO bed + a global word-time map that every cut and caption locks to"
       ],
       "artifacts": ["assets/character/character_hero.png", "assets/presenter/*.mp4", "analysis/presenter_timing.json"],
@@ -88,8 +88,8 @@
     "tools/ffmpeg_qc.py"
   ],
   "providers": {
-    "presenter": "fal.ai bytedance/seedance-2.0/reference-to-video (fictional character, --generate-audio)",
-    "craft_broll": "fal.ai bytedance/seedance-2.0/image-to-video (first-frame image_url + last-frame end_image_url)",
+    "presenter": "fal.ai bytedance/seedance-2.5/reference-to-video (fictional character, --generate-audio)",
+    "craft_broll": "fal.ai bytedance/seedance-2.5/image-to-video (first-frame image_url + last-frame end_image_url)",
     "character_image": "openai gpt-image-2 (quality=high) from a royalty-free staging photo",
     "receipts": "real source screenshots via Playwright (channel=chrome) + FFmpeg Ken Burns",
     "diagram": "HTML paused-CSS scrub-capture via Playwright, or Remotion / HyperFrames",

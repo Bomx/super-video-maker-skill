@@ -113,8 +113,8 @@
     "tools/broll_layout_qc.py"
   ],
   "providers": [
-    "fal.ai bytedance/seedance-2.0/reference-to-video (avatar hook)",
-    "fal.ai bytedance/seedance-2.0/text-to-video (documentary b-roll motion)",
+    "fal.ai bytedance/seedance-2.5/reference-to-video (avatar hook)",
+    "fal.ai bytedance/seedance-2.5/text-to-video (documentary b-roll motion)",
     "elevenlabs eleven_v3 with-timestamps (VO)",
     "openai gpt-image-2 (character refs + documentary stills)",
     "groq whisper-large-v3 (clip QC + word timing)",
