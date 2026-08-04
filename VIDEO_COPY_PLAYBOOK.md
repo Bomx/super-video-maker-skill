@@ -9,6 +9,10 @@ prose copy never has to solve: **two tracks running at once.**
 > `HOOK_PLAYBOOK_ARTICLE_SPRINT.md` = hook families and the angle-before-copy rule.
 > `LIVING_CANVAS_PLAYBOOK.md` §4 = story cold-open structure and announcer cadence.
 > This file governs; those three specialize. When they disagree, the more specific file wins.
+>
+> **If the register is what matters (and it usually is), read §11 FIRST.** It holds a
+> transcribed reference VO in the owner-approved plain register plus a before/after table
+> of rejected copy. Copy its sentence mechanics before writing a word.
 
 **Copy is a production gate, not a garnish.** Nothing gets generated (no TTS call, no
 Seedance clip, no Remotion timeline) until the spine below is written down. In the
@@ -254,3 +258,109 @@ One next step: take the free 90 day tracker.
 - **Anything unverified stays a placeholder.** If a specific post count or customer result
   is not confirmed, write `[N]` and surface it before render rather than picking a
   plausible number.
+
+---
+
+## 11. Reference read: the plain register (transcribe before you write)
+
+The single most reliable way to fix "this sounds like AI wrote it" is to transcribe a
+reference VO in the target register and copy its **sentence mechanics**, not its words.
+Groq Whisper on the reference is 30 seconds of work:
+
+```bash
+ffmpeg -y -i ref.mp4 -vn -ac 1 -ar 16000 -q:a 4 ref.mp3
+curl -s https://api.groq.com/openai/v1/audio/transcriptions \
+  -H "Authorization: Bearer $GROQ_API_KEY" \
+  -F "file=@ref.mp3" -F model=whisper-large-v3 \
+  -F response_format=verbose_json -F "timestamp_granularities[]=segment" -F language=en
+```
+
+### The house reference (70.8s, 162 words, zero figures of speech)
+
+A B2B SaaS motion piece. Owner-approved as the target register. Read it out loud once
+before drafting anything.
+
+```
+[ 0.00]  Hmm, okay, sent.
+[ 2.94]  After a hundred reach-outs today, maybe someone will respond.
+[ 6.78]  Oh.
+[ 8.44]  Ugh.
+[10.08]  Let's be honest, your problem isn't what you sell.
+[13.10]  It's spending hours building lists,
+[15.52]  contacting people who are not interested,
+[17.72]  and hoping volume will fix the problem.
+[20.20]  It's time to change.
+[22.94]  Gojiberry detects high-intent people in your market
+[25.34]  and automatically engages them at the right moment
+[28.00]  with personalized LinkedIn outreach.
+[30.00]  You enter your website, our AI understands your market, your offer,
+         and clearly defines who you should target and why they would buy.
+[37.78]  It then monitors buying signals in real time to spot actions that indicate
+         intent like job changes, competitor interactions, and meaningful engagement.
+[46.86]  AI agents score and prioritize the most active prospects and automatically
+         create and launch personalized outreach campaigns.
+[54.58]  You stop wasting time on cold prospects.
+[56.72]  You get 3 to 5 times more replies and demos without increasing volume.
+[61.76]  All of this on autopilot.
+[64.16]  Reach buyers when they're ready.
+[65.94]  Try Gojiberry now.
+[67.46]  2-minute setup.
+```
+
+### What it actually does
+
+| Beat | Seconds | Mechanic |
+|---|---|---|
+| Cold open | 0-9 | Almost wordless. One spoken line plus two grunts. The sound design carries it |
+| Turn | 10-21 | "Your problem isn't X. It's [behavior], [behavior], and [behavior]." Three literal actions the viewer performs, then "It's time to change" |
+| Mechanism | 22-30 | Names the product, then says literally what it does in one subject-verb-object sentence |
+| Steps | 30-54 | Three sentences, each opening with the actor: You / It / AI agents |
+| Payoff | 54-64 | "You stop [waste]. You get [number]." Then the friction killer |
+| CTA | 64-68 | Command, product name, setup time |
+
+### The eight rules it never breaks
+
+1. **Zero figures of speech.** Not one metaphor in 70 seconds. If a verb is doing
+   poetic work (borrow, unlock, rent, fuel, arm), it is the wrong verb.
+2. **Name the thing, then say what it does.** "Gojiberry detects high-intent people."
+   Never "a system that helps you find the right moment."
+3. **The turn is three literal behaviors**, not a concept. "Spending hours building
+   lists" is a thing the viewer physically does. "Fighting an uphill battle" is not.
+4. **Every step starts with its actor.** You / It / the agent. Never a passive or a
+   floating noun phrase.
+5. **Examples are listed flat.** "Job changes, competitor interactions, and meaningful
+   engagement." No "things like" hedging, no clever grouping.
+6. **Numbers are spoken plainly** and only where they are real.
+7. **One conversational hedge for the whole script.** Here it is "Let's be honest."
+   A second one reads as a tic.
+8. **No rhetorical questions.** The script never asks the viewer anything.
+
+### The pointing test
+
+After every sentence, ask: **could the viewer point at what I just named?**
+Medium, a regex, a city, a browser, a draft, a spreadsheet: pointable. Trust,
+authority, presence, momentum, the only answer that exists: not pointable. Rewrite
+until the nouns are things.
+
+### Before and after, from a real correction round
+
+The left column is copy an owner rejected as "too poetic, too conceptual, AI slop."
+The right column is the same argument in the plain register.
+
+| Rejected | Fixed |
+|---|---|
+| "So be the only answer that exists." | "Nobody has written that page." |
+| "Borrow a domain that already has the trust, and point it at a page nobody has written." | "Parasite SEO publishes your article on sites Google already trusts. Medium, Substack, YouTube, GitHub." |
+| "You are not building a brand there. You are renting their trust." | (cut: the metaphor was the whole sentence) |
+| "Find what people already ask you." | "The questions people typed to find you." |
+| "Claude writes a filter that shows only the questions." | "You open Search Console and paste in a regex from Claude." |
+| "It trusts Medium. Post there." | Name the whole set. One example standing in for a category reads as the only option. |
+
+Two failure patterns worth naming, because both showed up in one draft:
+
+- **Outcome described instead of action performed.** "Claude writes a filter" tells the
+  viewer what results. "Paste in a regex from Claude" tells them what to do. Video copy
+  wants the action, because the screen is showing it happen.
+- **A factual slip hiding inside a vague phrase.** "What people ask you" sounded fine and
+  was wrong: nobody was asking anything, the data was Google queries. Vague copy hides
+  errors. Concrete copy exposes them, which is a reason to prefer it beyond style.
