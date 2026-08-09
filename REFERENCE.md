@@ -436,20 +436,41 @@ recipe. What actually differs:
 | Distilled tiers | none | `fast/` and `mini/` |
 | Resolution | 480p, 720p, 1080p, 4k | same |
 | Duration | `auto`, 4-15s | same |
-| Access | early access, gated | generally available |
+| Access | generally available | generally available |
 
 Two things people expect from 2.5 that fal does not currently expose: there is
 no 30-second duration (the endpoint enum still stops at 15s) and there is no
 fast or mini tier. `--fast` and `--mini` therefore pin that single call back to
 2.0 and log that they did.
 
-### Seedance 2.5 is early access, and unentitled accounts fail silently
+### 2.5 costs more than 2.0, so pick the version deliberately
 
-Requesting 2.5 without entitlement does not return an error. fal answers HTTP
-200 in about a second and hands back the canned example clip from the
-endpoint's own schema, at whatever duration and resolution that sample happens
-to be. Every downstream step would treat that as a successful generation and
-ship stock footage.
+fal bills 2.5 by output tokens: `(height x width x duration x 24) / 1024`
+tokens at `$0.0214 / 1000 tokens`. Published rates (verified on the fal model
+page 2026-08-09):
+
+| | 2.5 | 2.0 |
+| --- | --- | --- |
+| 720p with audio | ~$0.4730/s | $0.3024/s standard, $0.2419/s fast |
+| 480p with audio | ~$0.2205/s | n/a as a published rate |
+
+A 720p 2.5 clip runs roughly 1.5x a 2.0 standard clip and about 2x a 2.0 fast
+clip. Use 2.5 where the shot carries the video, and `--fast` (which pins to
+2.0) for filler beats. Resolution dominates the bill, so drop to 480p for
+throwaway tests rather than shortening the clip.
+
+### The placeholder guard, and why it stays
+
+2.5 was early-access gated until access was granted on this account (verified
+2026-08-09: a real 4s/480p request returned 854x480, 4.04s, in 76s, with
+`"fell_back": false`). The guard below is now a regression detector rather than
+an everyday code path, and it stays in place.
+
+An unentitled 2.5 request does not return an error. fal answers HTTP 200 in
+about a second and hands back the canned example clip from the endpoint's own
+schema, at whatever duration and resolution that sample happens to be. Every
+downstream step would treat that as a successful generation and ship stock
+footage.
 
 `fal_seedance_video.py` guards against this: it detects the example asset by
 URL and, by default, retries on `--fallback-version` (2.0) and reports
@@ -463,12 +484,25 @@ Tells that a clip was not really generated:
 - `seed` of exactly 0.
 - Returned duration and resolution ignore what was requested.
 
-To get real 2.5 output, request access while signed in to fal on the model page
+If `fell_back` ever comes back `true` again, access has lapsed rather than
+broken: re-request it while signed in to fal on the model page
 (`https://fal.ai/models/bytedance/seedance-2.5/text-to-video`) and accept its
 terms. They are B2B-only and require an `end_user_id` on every payload, which
 the wrapper always sends (`--end-user-id`, else `FAL_END_USER_ID`, else a
-stable anonymous machine id). Once access is granted the default path starts
-producing real 2.5 clips with no code change.
+stable anonymous machine id). No code change is needed either way.
+
+### Install the client before the first call
+
+The wrapper imports `fal_client`, which is the one skill dependency that is not
+part of the base project environment. Install it into the same interpreter that
+runs the tools:
+
+```bash
+python3 -m pip install fal-client
+```
+
+Without it every Seedance call dies on `ModuleNotFoundError: No module named
+'fal_client'` before a single request reaches fal.
 
 Default:
 
